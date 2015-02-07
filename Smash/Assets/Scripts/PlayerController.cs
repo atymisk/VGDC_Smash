@@ -55,6 +55,7 @@ public class PlayerController : MonoBehaviour
 	private Dictionary<TimerType, int> timers;				// collection of timers for recovery delays, smash charges, etc.
 	private Dictionary<TimerType, int> timerMaxes;			// collection of timer maximum values
 	private Controls controls;								// reference to input handler
+    private PlayerStateScript stateScript;                  // reference to state script
 	private int jumpCount;									// number of jumps
 	private Vector2 prevPos;
 	private Vector2 prevVel;
@@ -69,7 +70,7 @@ public class PlayerController : MonoBehaviour
 		// Get reference to control script
 		// @TODO: move this outside of player game object and into a MatchManager or something
 		controls = GetComponent<Controls>();
-
+        stateScript = GetComponent<PlayerStateScript>();
 		// Initialize accelerations.
 		// @TODO: maybe move these into an entirely different acceleration handling class?
 		accelerations = new Dictionary<AccelType, Acceleration>();
@@ -169,6 +170,7 @@ public class PlayerController : MonoBehaviour
 		RemoveState(PlayerState.FALLING);			// player is no longer falling
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
+        
 	}
 	void StageCollideExit()
 	{
@@ -176,10 +178,7 @@ public class PlayerController : MonoBehaviour
 	}
 	void BoundaryCollideEnter()
 	{
-		transform.position = new Vector3(0, 5, 0);	// reset player position
-		jumpCount = 0;								// reset jump count
-		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-		AddState(PlayerState.MIDAIR);				// player should be in midair
+        stateScript.Die();                          // kill the player
 	}
 	void BoundaryCollideExit(){}
 	void GrabEdgeCollideEnter(){}
@@ -313,4 +312,15 @@ public class PlayerController : MonoBehaviour
 	{
 		print ("Neutral ");
 	}
+    //PUBLIC METHODS
+    public void ResetPosition()
+    {
+        
+        transform.position = new Vector3(0, 5, 0);	// reset player position
+        jumpCount = 0;								// reset jump count
+        ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
+        AddState(PlayerState.MIDAIR);				// player should be in midair
+        SetVelocity(0f, 0f, 0f);
+    }
+
 }

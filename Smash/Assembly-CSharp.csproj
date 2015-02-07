@@ -53,7 +53,7 @@
      <Compile Include="Assets\Scripts\GrabEdgeBehavior.cs" />
      <Compile Include="Assets\Scripts\HUDFPS.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
-     <Compile Include="Assets\Scripts\PlayerState.cs" />
+     <Compile Include="Assets\Scripts\PlayerStateScript.cs" />
      <Compile Include="Assets\Scripts\Tags.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity4.6B20/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.1/UnityEngine.UI.dll</HintPath>
