@@ -10,7 +10,7 @@ public class Controls : MonoBehaviour {
 		SPECIAL,
 		JUMP,
 		DUCK,
-		MOVE
+		MOVE,
 	};
 
 	// PRIVATE VARIABLES
@@ -30,7 +30,7 @@ public class Controls : MonoBehaviour {
 		endDict = new Dictionary<Command, bool>();
 		previousFacing = 0f;
 		stickInput = Vector2.zero;
-		InitializeKeyDict();
+        InitializeKeyDict();
 		InitializeHoldDict();
 		InitializeStartDict();
 		InitializeEndDict();
