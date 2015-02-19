@@ -131,7 +131,6 @@ public class PlayerController : MonoBehaviour
 		switch (other.tag)
 		{
             case Tags.Platform :
-                Debug.Log("platform collided");
                 StageCollideEnter();
                 PlatformCollideEnter(other);
                 break;
@@ -195,13 +194,11 @@ public class PlayerController : MonoBehaviour
     void PlatformCollideEnter(Collider other)
     {
         platform = other.transform.parent; // update the reference to the platform's collider
-        Debug.Log(other);
         AddState(PlayerState.PLATFORMGROUNDED);
     }
 
     void PlatformCollideExit()
     {
-        Debug.Log("exiting");
         RemoveState(PlayerState.PLATFORMGROUNDED);
     }
 
@@ -331,7 +328,7 @@ public class PlayerController : MonoBehaviour
 	}
     void DoDrop()
     {
-		if (controls.ConsumeCommandStart(Controls.Command.DUCK) && CanDrop())
+		if (CanDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
 			SetAccel(AccelType.FALL, null, maxDropSpeed * -1f, null, dropAccel);
 	}
 	void DoSmash ()
@@ -345,13 +342,15 @@ public class PlayerController : MonoBehaviour
 
     void DoPlatformDrop()
     {
-        if (controls.GetCommand(Controls.Command.SPECIAL) && CanPlatformDrop()) // TODO : change to the actual key
+        if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
         {
-            Debug.Log("platformDrop");
             //platform dropping code
-            StageCollideExit();
-            PlatformCollideExit();
+
+            StageCollideExit(); // collision will be disabled with the platform, so must call these here
+            PlatformCollideExit(); // ^ same
+
             Physics.IgnoreCollision(thisCollider, platform.FindChild("stage_surface").GetComponent<MeshCollider>(), true);
+            Physics.IgnoreCollision(thisCollider, platform.FindChild("platform_lower_surface").GetComponent<MeshCollider>(), true);
             Physics.IgnoreCollision(thisCollider, platform.FindChild("stage_model").GetComponent<BoxCollider>(), true);
             
 
@@ -370,10 +369,12 @@ public class PlayerController : MonoBehaviour
 
     public void OnPlatformDropEnd(Collider other)
     {
-        //StageCollideExit(); //might not be necessary; could call once platform dropping is started // moved to DoPlatformDrop()
-        //PlatformCollideExit(); // ^ same
 
-        Physics.IgnoreCollision(thisCollider, other, false);
+        Transform otherTransform = other.transform.parent; // get the reference to the object's parent so we can get to all the colliders we need
+
+        Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_surface").GetComponent<MeshCollider>(), false);
+        Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("platform_lower_surface").GetComponent<MeshCollider>(), false);
+        Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_model").GetComponent<BoxCollider>(), false);
 
     }
 }

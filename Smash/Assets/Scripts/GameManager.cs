@@ -6,8 +6,22 @@ public class GameManager : MonoBehaviour {
 	void Awake ()
 	{
 		Application.targetFrameRate = 60;
-        CapsuleCollider one = GameObject.Find("player").GetComponent<CapsuleCollider>();
-        CapsuleCollider two = GameObject.Find("player2").GetComponent<CapsuleCollider>();
-        Physics.IgnoreCollision(one, two, true);
+        GameObject[] players;
+        players = GameObject.FindGameObjectsWithTag(Tags.Player);
+
+        //ignore collisions between all players
+        foreach (GameObject player1 in players)
+        {
+            CapsuleCollider colliderOne = player1.GetComponent<CapsuleCollider>();
+            foreach (GameObject player2 in players)
+            {
+                CapsuleCollider colliderTwo = player2.GetComponent<CapsuleCollider>();
+
+                if (!colliderOne.Equals(colliderTwo)) // make sure they aren't the same collider; cannot stop collisions between yourself
+                {
+                    Physics.IgnoreCollision(colliderOne, colliderTwo, true); // prevent physics collisions between the two players
+                }
+            }
+        }
 	}
 }
