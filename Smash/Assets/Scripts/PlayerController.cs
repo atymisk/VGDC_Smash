@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
 		MIDAIR,
 		FALLING,
         PLATFORMGROUNDED,
+        STAGEGROUNDED,
+        RISING,
 	};
 
 	public enum AccelType
@@ -63,7 +65,7 @@ public class PlayerController : MonoBehaviour
 	private Vector2 currVel;
     private Collider thisCollider; //reference to this player's main physics collider
     private Transform platform; // may be null until initialized; DO NOT USE TO CHECK IF GROUNDED ON A PLATFORM!! THAT"S WHY WE HAVE THE ENUMS!!
-
+    private List<Collider> platformColliders; // reference to every platform collider, so that they can be disabled when jumping up
 	// INITIALIZE
 	void Awake ()
 	{
@@ -96,6 +98,17 @@ public class PlayerController : MonoBehaviour
 		// Set previous player position and velocity
 		currVel = Vector2.zero;
 		UpdatePreviousVectors();
+
+        // Set reference to all platform colliders
+        platformColliders = new List<Collider>();
+        GameObject[] platformObjects = GameObject.FindGameObjectsWithTag(Tags.Platform); //note: this actually gets one of the child objects, not the head platform object
+        foreach (GameObject platformObject in platformObjects)
+        {
+            Transform platformTransform = platformObject.transform.parent; // get the reference to the head platform object
+
+            platformColliders.Add(platformTransform.FindChild("stage_surface").GetComponent<MeshCollider>());
+            platformColliders.Add(platformTransform.FindChild("stage_model").GetComponent<BoxCollider>());
+        }
 	}
 
 	// FIXED UPDATE : update interval is exactly 1/60
@@ -114,9 +127,10 @@ public class PlayerController : MonoBehaviour
 		// handle commands
 		DoMove ();
 		DoJump ();
+        DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
-        DoPlatformDrop();
+       
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
 			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
@@ -180,6 +194,8 @@ public class PlayerController : MonoBehaviour
 	{
 		RemoveState(PlayerState.MIDAIR);			// player is no longer midair
 		RemoveState(PlayerState.FALLING);			// player is no longer falling
+        RemoveState(PlayerState.RISING);            // player is no longer rising
+        AddState(PlayerState.STAGEGROUNDED);        // player is grounded on a stage
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         
@@ -189,6 +205,7 @@ public class PlayerController : MonoBehaviour
 	void StageCollideExit()
 	{
 		AddState(PlayerState.MIDAIR);				// player is midair
+        RemoveState(PlayerState.STAGEGROUNDED);     // player is no longer grounded on a stage
 	}
 
     void PlatformCollideEnter(Collider other)
@@ -228,7 +245,6 @@ public class PlayerController : MonoBehaviour
 	void RemoveState(PlayerState state) { states.Remove(state); }
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
-	bool ChangedDirectionVertical() { return currVel.y < 0f && prevVel.y * currVel.y <= 0f; }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
 	void UpdatePreviousVectors()
 	{
@@ -320,8 +336,19 @@ public class PlayerController : MonoBehaviour
 	void DoFall()
 	{
 		// the below returns true when we have STARTED to fall
-		if (ChangedDirectionVertical())
-			AddState(PlayerState.FALLING);
+        if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED))
+        {
+            AddState(PlayerState.FALLING);
+            RemoveState(PlayerState.RISING);
+            SetPlatformCollision(true); //enable collisions so we don't phase through
+        }
+        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED)) //check to see if we're rising; only returns true when we've entered the rising state
+        {
+            RemoveState(PlayerState.FALLING);
+            AddState(PlayerState.RISING);
+            SetPlatformCollision(false); //disable collisions so we can phase through
+        }
+
 		if (CanFall()) {
             
 		}
@@ -344,27 +371,41 @@ public class PlayerController : MonoBehaviour
     {
         if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
         {
+            AddState(PlayerState.FALLING);
+
             //platform dropping code
 
             StageCollideExit(); // collision will be disabled with the platform, so must call these here
             PlatformCollideExit(); // ^ same
 
             Physics.IgnoreCollision(thisCollider, platform.FindChild("stage_surface").GetComponent<MeshCollider>(), true);
-            Physics.IgnoreCollision(thisCollider, platform.FindChild("platform_lower_surface").GetComponent<MeshCollider>(), true);
             Physics.IgnoreCollision(thisCollider, platform.FindChild("stage_model").GetComponent<BoxCollider>(), true);
             
 
+        }
+    }
+
+    void SetPlatformCollision(bool toggle)
+    {
+        foreach (Collider platformCollider in platformColliders)
+        {
+            Physics.IgnoreCollision(thisCollider, platformCollider, !toggle);
         }
     }
     //PUBLIC METHODS
     public void ResetPosition()
     {
         
-        transform.position = new Vector3(0, 5, 0);	// reset player position
+        transform.position = new Vector3(0, 10, 0);	// reset player position
         jumpCount = 0;								// reset jump count
         ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        AddState(PlayerState.MIDAIR);				// player should be in midair
-        SetVelocity(0f, 0f, 0f);
+        AddState(PlayerState.MIDAIR);				// player should be in midair and falling   
+        SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
+        RemoveState(PlayerState.FALLING);           // reset all other previous states
+        RemoveState(PlayerState.RISING);            
+        RemoveState(PlayerState.PLATFORMGROUNDED);
+        RemoveState(PlayerState.STAGEGROUNDED);
+        SetPlatformCollision(true);                 // reset platform collision
     }
 
     public void OnPlatformDropEnd(Collider other)
@@ -373,7 +414,6 @@ public class PlayerController : MonoBehaviour
         Transform otherTransform = other.transform.parent; // get the reference to the object's parent so we can get to all the colliders we need
 
         Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_surface").GetComponent<MeshCollider>(), false);
-        Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("platform_lower_surface").GetComponent<MeshCollider>(), false);
         Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_model").GetComponent<BoxCollider>(), false);
 
     }

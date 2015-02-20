@@ -14,10 +14,10 @@ public class PlayerTriggerColliderScript : MonoBehaviour
     {
         switch (other.tag)
         {
-            case Tags.Platform:
+            case Tags.Platform :
                 controller.OnPlatformDropEnd(other); // notify the PlayerController that we're outside the platform and that collision can be re-enabled. (Must be done in this trigger collider because disabling collisions also disabled detection of the end of the collision on the main collider)
                 break;
-            default:
+            default :
                 break;
         }
     }
