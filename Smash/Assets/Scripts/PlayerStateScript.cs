@@ -6,12 +6,12 @@ public class PlayerStateScript : MonoBehaviour {
     public int numLives = 5;
     public float forceScalar = 10;
     private float currentDamage;
-	private Controls controls;								// reference to input handler
+	//private Controls controls;								// reference to input handler // not needed anymore
     private PlayerController controller;                    //reference to playercontroller
 	// Use this for initialization
 	void Start () {
 	    currentDamage = 0;
-		controls = GetComponent<Controls>();
+		// controls = GetComponent<Controls>(); // not needed anymore
         controller = GetComponent<PlayerController>();
 	}
 	
@@ -20,7 +20,7 @@ public class PlayerStateScript : MonoBehaviour {
 	    
 	}
 
-    void TakeHit(float damage, Vector3 hitOrigin)
+    public void TakeHit(float damage, Vector3 hitOrigin)
     {
         //damage stuff
         currentDamage +=damage;
@@ -50,11 +50,11 @@ public class PlayerStateScript : MonoBehaviour {
 
 	void FixedUpdate()
 	{
-		if (controls.ConsumeCommandStart(Controls.Command.ATTACK))
-		{
-            Debug.Log("attack");
-			TakeHit (100, new Vector3(0,0,0));
-		}
+		//if (controls.ConsumeCommandStart(Controls.Command.ATTACK))
+		//{
+            //Debug.Log("attack");
+			//TakeHit (100, new Vector3(0,0,0));
+		//}
 	}
     float GetCurrentDamage()
     {

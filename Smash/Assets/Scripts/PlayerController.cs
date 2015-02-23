@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
         STAGEGROUNDED,
         RISING,
         LEDGEGRABBING,
+        ATTACKING,
 	};
 
 	public enum AccelType
@@ -51,6 +52,8 @@ public class PlayerController : MonoBehaviour
 	public float dropAccel = 260f;				// fall acceleration
 	public float maxFallSpeed = 18f;			// max falling speed
 	public float maxDropSpeed = 26f;			// max forced drop speed
+
+    public float neutralAttackDamage = 100.0f;  // damage for a neutral attack
 
 	public Text HUDText;
 	
@@ -131,7 +134,8 @@ public class PlayerController : MonoBehaviour
         DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
-       
+        DoNeutralAttack();
+
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
 			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
@@ -145,6 +149,9 @@ public class PlayerController : MonoBehaviour
 	{
 		switch (other.tag)
 		{
+            case Tags.PlayerTrigger :
+                PlayerCollideEnter(other);
+                break;
             case Tags.Platform :
                 StageCollideEnter();
                 PlatformCollideEnter(other);
@@ -212,7 +219,15 @@ public class PlayerController : MonoBehaviour
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         
 	}
-    
+
+    void PlayerCollideEnter(Collider other)
+    {
+        if (HasState(PlayerState.ATTACKING))
+        {
+            other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+            RemoveState(PlayerState.ATTACKING); //can't do multiple damage
+        }
+    }
 
 	void StageCollideExit()
 	{
@@ -264,6 +279,7 @@ public class PlayerController : MonoBehaviour
 	void StopEdgeCollideExit(){}
 
 	// STATE CHECKERS
+    bool CanAttack() { return !HasState(PlayerState.ATTACKING); }  // TODO : timer between attacks?
     bool CanMove() { return !HasState(PlayerState.LEDGEGRABBING); }
 	bool CanJump () { return jumpCount < maxJumps; }
 	bool CanFall () { return HasState(PlayerState.MIDAIR); }
@@ -400,7 +416,11 @@ public class PlayerController : MonoBehaviour
 	}
 	void DoNeutralAttack ()
 	{
-		print ("Neutral ");
+        if (CanAttack() && controls.ConsumeCommandStart(Controls.Command.ATTACK))
+        {
+            AddState(PlayerState.ATTACKING);
+            // TODO : timer to end the attacking state
+        }
 	}
 
     void DoPlatformDrop()
@@ -449,6 +469,7 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.PLATFORMGROUNDED);
         RemoveState(PlayerState.STAGEGROUNDED);
         RemoveState(PlayerState.LEDGEGRABBING);
+        RemoveState(PlayerState.ATTACKING);
         SetPlatformCollision(true);                 // reset platform collision
     }
 
