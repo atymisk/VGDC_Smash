@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
         PLATFORMGROUNDED,
         STAGEGROUNDED,
         RISING,
+        LEDGEGRABBING,
 	};
 
 	public enum AccelType
@@ -168,7 +169,7 @@ public class PlayerController : MonoBehaviour
 	{
 		switch (other.tag)
 		{   
-        case Tags.Platform : //non-platform drop exiting
+        case Tags.Platform : //non-platform-drop (normal) exiting
 			StageCollideExit();
             PlatformCollideExit();
 			break;
@@ -188,6 +189,17 @@ public class PlayerController : MonoBehaviour
 			break;
 		}
 	}
+    void OnTriggerStay(Collider other)
+    {
+        switch (other.tag)
+        {
+            case Tags.GrabEdge:
+                GrabEdgeCollideStay(other);
+			break;
+            default:
+                break;
+        }
+    }
 
 	// COLLISION HANDLERS
 	void StageCollideEnter()
@@ -225,7 +237,29 @@ public class PlayerController : MonoBehaviour
 	}
 	void BoundaryCollideExit(){}
 	void GrabEdgeCollideEnter(){}
-	void GrabEdgeCollideExit(){}
+	void GrabEdgeCollideExit()
+    {
+        if (HasState(PlayerState.LEDGEGRABBING))
+        {
+            RemoveState(PlayerState.LEDGEGRABBING); 
+            EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
+        }
+    }
+    void GrabEdgeCollideStay(Collider other)
+    {
+        if (HasState(PlayerState.FALLING) && !HasState(PlayerState.LEDGEGRABBING)) //start a ledge grab
+        {
+            RemoveState(PlayerState.FALLING);   // reset states
+            RemoveState(PlayerState.MIDAIR);
+            AddState(PlayerState.LEDGEGRABBING);
+            transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
+            if(jumpCount < 1)
+                jumpCount = 1;								// let the player jump out of it
+            ResetAccel(AccelType.FALL);					// return fall acceleration to natural value 
+            EnableAccel(AccelType.FALL, false);         // disable falling while hanging
+            SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
+        }
+    }
 	void StopEdgeCollideEnter(){}
 	void StopEdgeCollideExit(){}
 
@@ -235,13 +269,14 @@ public class PlayerController : MonoBehaviour
 	bool CanFall () { return HasState(PlayerState.MIDAIR); }
 	bool CanDrop () { return HasState(PlayerState.MIDAIR); }
     bool CanPlatformDrop() { return HasState(PlayerState.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
-
+    bool CanLedgeDrop() { return HasState(PlayerState.LEDGEGRABBING); }
 	// UTILITY FUNCTIONS
 	bool TimerDone(TimerType timer) { return timers[timer] >= timerMaxes[timer]; }
 	void SetTimer(TimerType timer, int frames) { timers[timer] = frames; }
 	void SetTimerMax(TimerType timer, int frames) { timerMaxes[timer] = frames; }
 	void SetAccel(AccelType accel, float? x, float? y, float? z, float mag) { accelerations[accel].Set(x, y, z, mag); }
 	void ResetAccel(AccelType accel) { accelerations[accel].Reset(); }
+    void EnableAccel(AccelType accel, bool enabled) { accelerations[accel].enabled = enabled; }
 	void RemoveState(PlayerState state) { states.Remove(state); }
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
@@ -275,7 +310,8 @@ public class PlayerController : MonoBehaviour
 		float sign = Mathf.Sign (controls.GetCommandMagnitude(Controls.Command.MOVE));		// get sign
 
 		// While moving ...
-		if (controls.GetCommand (Controls.Command.MOVE) && CanMove()) {		// if move command is being issued ...
+        if (controls.GetCommand(Controls.Command.MOVE) && CanMove() && !HasState(PlayerState.LEDGEGRABBING))
+        {		// if move command is being issued ...
 			if (HasState(PlayerState.MIDAIR))	// flat movement speed in midair
 				SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
 			else {
@@ -336,13 +372,13 @@ public class PlayerController : MonoBehaviour
 	void DoFall()
 	{
 		// the below returns true when we have STARTED to fall
-        if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED))
+        if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING))
         {
             AddState(PlayerState.FALLING);
             RemoveState(PlayerState.RISING);
             SetPlatformCollision(true); //enable collisions so we don't phase through
         }
-        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED)) //check to see if we're rising; only returns true when we've entered the rising state
+        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING)) //check to see if we're rising; only returns true when we've entered the rising state
         {
             RemoveState(PlayerState.FALLING);
             AddState(PlayerState.RISING);
@@ -355,7 +391,7 @@ public class PlayerController : MonoBehaviour
 	}
     void DoDrop()
     {
-		if (CanDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
+        if (CanDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
 			SetAccel(AccelType.FALL, null, maxDropSpeed * -1f, null, dropAccel);
 	}
 	void DoSmash ()
@@ -369,7 +405,7 @@ public class PlayerController : MonoBehaviour
 
     void DoPlatformDrop()
     {
-        if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
+        if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //normal platforms
         {
             AddState(PlayerState.FALLING);
 
@@ -382,6 +418,13 @@ public class PlayerController : MonoBehaviour
             Physics.IgnoreCollision(thisCollider, platform.FindChild("stage_model").GetComponent<BoxCollider>(), true);
             
 
+        }
+        if (CanLedgeDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //dropping from a ledge grab
+        {
+            AddState(PlayerState.FALLING);
+            AddState(PlayerState.MIDAIR);
+            EnableAccel(AccelType.FALL, true);
+            jumpCount = 0; // can't use ledge grabs to get more jumps
         }
     }
 
@@ -405,6 +448,7 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.RISING);            
         RemoveState(PlayerState.PLATFORMGROUNDED);
         RemoveState(PlayerState.STAGEGROUNDED);
+        RemoveState(PlayerState.LEDGEGRABBING);
         SetPlatformCollision(true);                 // reset platform collision
     }
 
