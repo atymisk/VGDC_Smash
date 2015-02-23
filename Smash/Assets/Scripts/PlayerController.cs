@@ -194,7 +194,7 @@ public class PlayerController : MonoBehaviour
         switch (other.tag)
         {
             case Tags.GrabEdge:
-                GrabEdgeCollideStay(other);
+                GrabEdgeCollideStay(other); //it's in OnTriggerStay instead of OnTriggerEnter or Exit so that it can trigger at the top of the parabola.
 			break;
             default:
                 break;
@@ -264,7 +264,7 @@ public class PlayerController : MonoBehaviour
 	void StopEdgeCollideExit(){}
 
 	// STATE CHECKERS
-	bool CanMove () { return true; }
+    bool CanMove() { return !HasState(PlayerState.LEDGEGRABBING); }
 	bool CanJump () { return jumpCount < maxJumps; }
 	bool CanFall () { return HasState(PlayerState.MIDAIR); }
 	bool CanDrop () { return HasState(PlayerState.MIDAIR); }
@@ -310,7 +310,7 @@ public class PlayerController : MonoBehaviour
 		float sign = Mathf.Sign (controls.GetCommandMagnitude(Controls.Command.MOVE));		// get sign
 
 		// While moving ...
-        if (controls.GetCommand(Controls.Command.MOVE) && CanMove() && !HasState(PlayerState.LEDGEGRABBING))
+        if (controls.GetCommand(Controls.Command.MOVE) && CanMove())
         {		// if move command is being issued ...
 			if (HasState(PlayerState.MIDAIR))	// flat movement speed in midair
 				SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
