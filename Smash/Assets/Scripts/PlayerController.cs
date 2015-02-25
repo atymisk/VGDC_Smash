@@ -352,7 +352,7 @@ public class PlayerController : MonoBehaviour
 		// While moving ...
         if (controls.GetCommand(Controls.Command.MOVE) && CanMove())
         {		// if move command is being issued ...
-			if (HasState(PlayerState.MIDAIR))	// flat movement speed in midair
+			if (InState(States.Falling) || InState(States.Rising))	// flat movement speed in midair
 				SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
 			else {
 				if (magnitude > 0.98f) {				 // dashing speed
@@ -364,7 +364,7 @@ public class PlayerController : MonoBehaviour
 					SetAccel(AccelType.MOVE, minRunSpeed * sign, null, null, groundAcceleration);
 			}
 		} else {					// if not moving ...
-			if (HasState(PlayerState.MIDAIR))							// in midair apply midair drag
+            if (InState(States.Falling) || InState(States.Rising))							// in midair apply midair drag
 				SetAccel(AccelType.MOVE, 0f, null, null, midairDrag);
 			else {
 				SetAccel(AccelType.MOVE, 0f, null, null, groundDrag);	// on ground apply ground drag
@@ -378,7 +378,7 @@ public class PlayerController : MonoBehaviour
         {
             accelerations[AccelType.FALL].Reset();			// reset gravity when another jump starts. for repeated accelerated falls.
             SetVelocity(null, 0f, null);					// reset vertical velocity for new jump
-            if (HasState(PlayerState.MIDAIR))
+            if (InState(States.Falling) || InState(States.Rising))
             {				// give maneuverability burst while starting a jump in midair
                 float horizSign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.MOVE));
                 horizSign = horizSign * Mathf.Sign(rigidbody.velocity.x);
@@ -408,7 +408,7 @@ public class PlayerController : MonoBehaviour
 
 		// On jump command end ...
 		if (controls.ConsumeCommandEnd(Controls.Command.JUMP))
-			if (HasState(PlayerState.MIDAIR))
+            if (InState(States.Falling) || InState(States.Rising))
 				jumpCount++;
     }
 	void DoFall()
@@ -456,7 +456,6 @@ public class PlayerController : MonoBehaviour
         if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //normal platforms
         {
             AddState(PlayerState.FALLING);
-            theStateMachine.SetTrigger(Triggers.InputDuck);
             //platform dropping code
 
             StageCollideExit(); // collision will be disabled with the platform, so must call these here
@@ -469,7 +468,6 @@ public class PlayerController : MonoBehaviour
         }
         if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
-            theStateMachine.SetTrigger(Triggers.InputDuck);
             AddState(PlayerState.FALLING);
             AddState(PlayerState.MIDAIR);
             EnableAccel(AccelType.FALL, true);
