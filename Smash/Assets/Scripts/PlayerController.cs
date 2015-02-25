@@ -274,6 +274,7 @@ public class PlayerController : MonoBehaviour
             RemoveState(PlayerState.FALLING);   // reset states
             RemoveState(PlayerState.MIDAIR);
             AddState(PlayerState.LEDGEGRABBING);
+            theStateMachine.SetTrigger(StateMachineTriggers.LedgeGrabEnter);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
             if(jumpCount < 1)
                 jumpCount = 1;								// let the player jump out of it
@@ -391,7 +392,7 @@ public class PlayerController : MonoBehaviour
 			float scale = 1f - ((float) timers[TimerType.JUMP] / (float) MAX_JUMP_FRAMES);
 			float powerScale = Mathf.Pow(scale, jumpDegradeFactor);
 			SetAccel(AccelType.JUMP, null, jumpSpeed, null, baseJumpAccel * powerScale);
-			HUDText.text = "Jump: " + (jumpSpeed * powerScale).ToString();
+			//HUDText.text = "Jump: " + (jumpSpeed * powerScale).ToString();
 		} else
 			ResetAccel(AccelType.JUMP);		// reset when jump is done
 
@@ -458,6 +459,7 @@ public class PlayerController : MonoBehaviour
         }
         if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
+            theStateMachine.SetTrigger(StateMachineTriggers.InputDuck);
             AddState(PlayerState.FALLING);
             AddState(PlayerState.MIDAIR);
             EnableAccel(AccelType.FALL, true);

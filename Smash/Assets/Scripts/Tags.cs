@@ -10,3 +10,10 @@ public class Tags : MonoBehaviour {
 	public const string StopEdge = "StopEdge";
     public const string Platform = "Platform";
 }
+
+public class StateMachineTriggers : MonoBehaviour
+{
+    public const string LedgeGrabEnter = "LedgeGrabEnter";
+    public const string InputDuck = "InputDuck";
+}
+
