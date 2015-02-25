@@ -58,7 +58,8 @@ public class PlayerController : MonoBehaviour
     public float neutralAttackDamage = 100.0f;  // damage for a neutral attack
 
 	public Text HUDText;
-	
+
+    private Animator theStateMachine;
 	private HashSet<PlayerState> states;						// collection of the states the player is in
 	private Dictionary<AccelType, Acceleration> accelerations;	// collection of accelerations ocurring on this player
 	private Dictionary<TimerType, int> timers;				// collection of timers for recovery delays, smash charges, etc.
@@ -83,6 +84,7 @@ public class PlayerController : MonoBehaviour
 		controls = GetComponent<Controls>();
         stateScript = GetComponent<PlayerStateScript>();
         thisCollider = GetComponent<CapsuleCollider>();
+        theStateMachine = GetComponent<Animator>();
 		// Initialize accelerations.
 		// @TODO: maybe move these into an entirely different acceleration handling class?
 		accelerations = new Dictionary<AccelType, Acceleration>();
@@ -133,6 +135,9 @@ public class PlayerController : MonoBehaviour
 		// update position and velocity storage
 		UpdateCurrentVectors();
 
+        // update previous position and velocity information
+        UpdatePreviousVectors();
+
 		// handle commands
 		DoMove ();
 		DoJump ();
@@ -144,9 +149,6 @@ public class PlayerController : MonoBehaviour
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
 			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
-
-		// update previous position and velocity information
-		UpdatePreviousVectors();
 	}
 
 	// COLLISIONS
@@ -318,6 +320,7 @@ public class PlayerController : MonoBehaviour
 	{
 		currVel.x = (transform.position.x - prevPos.x) / Time.fixedDeltaTime;
 		currVel.y = (transform.position.y - prevPos.y) / Time.fixedDeltaTime;
+        theStateMachine.SetFloat("currVel.y", currVel.y);
 	}
     void UpdateTimer(TimerType timer)
 	{
