@@ -162,9 +162,11 @@ public class PlayerController : MonoBehaviour
             case Tags.Platform :
                 StageCollideEnter();
                 PlatformCollideEnter(other);
+                theStateMachine.SetTrigger(Triggers.PlatformEnter);
                 break;
 			case Tags.Stage :
 				StageCollideEnter();
+                theStateMachine.SetTrigger(Triggers.StageEnter);
 				break;
 			case Tags.Boundary :
 				BoundaryCollideEnter();
@@ -186,9 +188,11 @@ public class PlayerController : MonoBehaviour
         case Tags.Platform : //non-platform-drop (normal) exiting
 			StageCollideExit();
             PlatformCollideExit();
+            theStateMachine.SetTrigger(Triggers.PlatformExit);
 			break;
 		case Tags.Stage :
 			StageCollideExit();
+            theStateMachine.SetTrigger(Triggers.StageExit);
 			break;
 		case Tags.Boundary :
 			BoundaryCollideExit();
@@ -216,16 +220,6 @@ public class PlayerController : MonoBehaviour
     }
 
 	// COLLISION HANDLERS
-	void StageCollideEnter()
-	{
-		RemoveState(PlayerState.MIDAIR);			// player is no longer midair
-		RemoveState(PlayerState.FALLING);			// player is no longer falling
-        RemoveState(PlayerState.RISING);            // player is no longer rising
-        AddState(PlayerState.STAGEGROUNDED);        // player is grounded on a stage
-		jumpCount = 0;								// reset number of jumps player has made
-		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        
-	}
 
     void PlayerCollideEnter(Collider other)
     {
@@ -236,6 +230,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+	void StageCollideEnter()
+	{
+		RemoveState(PlayerState.MIDAIR);			// player is no longer midair
+		RemoveState(PlayerState.FALLING);			// player is no longer falling
+        RemoveState(PlayerState.RISING);            // player is no longer rising
+        AddState(PlayerState.STAGEGROUNDED);        // player is grounded on a stage
+		jumpCount = 0;								// reset number of jumps player has made
+		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
+        
+	}
+    
 	void StageCollideExit()
 	{
 		AddState(PlayerState.MIDAIR);				// player is midair
@@ -263,6 +268,10 @@ public class PlayerController : MonoBehaviour
     {
         if (HasState(PlayerState.LEDGEGRABBING))
         {
+            if (InState(States.LedgeGrabbing))
+            {
+                theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
+            }
             RemoveState(PlayerState.LEDGEGRABBING); 
             EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
         }
@@ -274,7 +283,7 @@ public class PlayerController : MonoBehaviour
             RemoveState(PlayerState.FALLING);   // reset states
             RemoveState(PlayerState.MIDAIR);
             AddState(PlayerState.LEDGEGRABBING);
-            theStateMachine.SetTrigger(StateMachineTriggers.LedgeGrabEnter);
+            theStateMachine.SetTrigger(Triggers.LedgeGrabEnter);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
             if(jumpCount < 1)
                 jumpCount = 1;								// let the player jump out of it
@@ -308,6 +317,7 @@ public class PlayerController : MonoBehaviour
 	void RemoveState(PlayerState state) { states.Remove(state); }
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
+    bool InState(string state) { return theStateMachine.GetCurrentAnimatorStateInfo(0).IsName(state); }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
 
 	void UpdatePreviousVectors()
@@ -446,7 +456,7 @@ public class PlayerController : MonoBehaviour
         if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //normal platforms
         {
             AddState(PlayerState.FALLING);
-
+            theStateMachine.SetTrigger(Triggers.InputDuck);
             //platform dropping code
 
             StageCollideExit(); // collision will be disabled with the platform, so must call these here
@@ -459,7 +469,7 @@ public class PlayerController : MonoBehaviour
         }
         if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
-            theStateMachine.SetTrigger(StateMachineTriggers.InputDuck);
+            theStateMachine.SetTrigger(Triggers.InputDuck);
             AddState(PlayerState.FALLING);
             AddState(PlayerState.MIDAIR);
             EnableAccel(AccelType.FALL, true);
