@@ -20,13 +20,14 @@ public class PlayerController : MonoBehaviour
 	{
 		FALL,
 		JUMP,
-		MOVE
+		MOVE,
 	};
 
 	public enum TimerType
 	{
 		JUMP,
-		DELAY_JUMP
+		DELAY_JUMP,
+        LEDGE_GRAB,
     };
 
 	public int JUMP_DELAY_FRAMES = 2;		// delay before actually jumping
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
 	public int MID_JUMP_FRAMES = 10;		// mid jump frames
 	public int MAX_JUMP_FRAMES = 24;		// max jump frames
 	public int FALL_ACCEL_FRAMES = 8;		// how many frames it take to acclerate to falling speed
+    public int LEDGE_GRAB_FRAMES = 180;      // how long you can ledge grab without falling
 
 	public float groundAcceleration = 100f;		// ground horizontal acceleration
 	public float groundDrag = 50f;				// ground drag
@@ -92,9 +94,11 @@ public class PlayerController : MonoBehaviour
 		timers = new Dictionary<TimerType, int>();
 		timers.Add (TimerType.JUMP, MAX_JUMP_FRAMES);
 		timers.Add (TimerType.DELAY_JUMP, JUMP_DELAY_FRAMES);
+        timers.Add (TimerType.LEDGE_GRAB, LEDGE_GRAB_FRAMES);
 		timerMaxes = new Dictionary<TimerType, int>();
 		timerMaxes.Add (TimerType.JUMP, MAX_JUMP_FRAMES);
 		timerMaxes.Add (TimerType.DELAY_JUMP, JUMP_DELAY_FRAMES);
+        timerMaxes.Add (TimerType.LEDGE_GRAB, LEDGE_GRAB_FRAMES);
         
         // Player starts midair, so allow one air jump
 		jumpCount = 1;
@@ -124,6 +128,7 @@ public class PlayerController : MonoBehaviour
 		// update timers
 		UpdateTimer(TimerType.DELAY_JUMP);
 		UpdateTimer(TimerType.JUMP);
+        UpdateTimer(TimerType.LEDGE_GRAB);
 
 		// update position and velocity storage
 		UpdateCurrentVectors();
@@ -273,6 +278,9 @@ public class PlayerController : MonoBehaviour
             ResetAccel(AccelType.FALL);					// return fall acceleration to natural value 
             EnableAccel(AccelType.FALL, false);         // disable falling while hanging
             SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
+
+            SetTimer(TimerType.LEDGE_GRAB, 0);					// start ledge grab timer
+            SetTimerMax(TimerType.LEDGE_GRAB, LEDGE_GRAB_FRAMES);
         }
     }
 	void StopEdgeCollideEnter(){}
@@ -286,6 +294,7 @@ public class PlayerController : MonoBehaviour
 	bool CanDrop () { return HasState(PlayerState.MIDAIR); }
     bool CanPlatformDrop() { return HasState(PlayerState.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
     bool CanLedgeDrop() { return HasState(PlayerState.LEDGEGRABBING); }
+
 	// UTILITY FUNCTIONS
 	bool TimerDone(TimerType timer) { return timers[timer] >= timerMaxes[timer]; }
 	void SetTimer(TimerType timer, int frames) { timers[timer] = frames; }
@@ -297,6 +306,7 @@ public class PlayerController : MonoBehaviour
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
+
 	void UpdatePreviousVectors()
 	{
 		prevVel.x = currVel.x;
@@ -349,6 +359,21 @@ public class PlayerController : MonoBehaviour
 	}
 	void DoJump()
 	{
+        // On jump start ...
+        if (controls.ConsumeCommandStart(Controls.Command.JUMP) && CanJump())
+        {
+            accelerations[AccelType.FALL].Reset();			// reset gravity when another jump starts. for repeated accelerated falls.
+            SetVelocity(null, 0f, null);					// reset vertical velocity for new jump
+            if (HasState(PlayerState.MIDAIR))
+            {				// give maneuverability burst while starting a jump in midair
+                float horizSign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.MOVE));
+                horizSign = horizSign * Mathf.Sign(rigidbody.velocity.x);
+                SetAccel(AccelType.MOVE, rigidbody.velocity.x * horizSign, null, null, maneuverability);
+            }
+            SetTimer(TimerType.JUMP, 0);					// start jump timer
+            SetTimerMax(TimerType.JUMP, MIN_JUMP_FRAMES);	// set jump to short hop duration
+        }
+
 		// While jump command is being issued ...
 		if (controls.GetCommand(Controls.Command.JUMP) && CanJump()) {
 			if (timers[TimerType.JUMP] == MID_JUMP_FRAMES)							// max jump duration
@@ -367,19 +392,6 @@ public class PlayerController : MonoBehaviour
 		} else
 			ResetAccel(AccelType.JUMP);		// reset when jump is done
 
-		// On jump start ...
-		if (controls.ConsumeCommandStart(Controls.Command.JUMP) && CanJump()) {
-			accelerations[AccelType.FALL].Reset();			// reset gravity when another jump starts. for repeated accelerated falls.
-			SetVelocity(null, 0f, null);					// reset vertical velocity for new jump
-			if (HasState(PlayerState.MIDAIR)) {				// give maneuverability burst while starting a jump in midair
-				float horizSign = Mathf.Sign (controls.GetCommandMagnitude(Controls.Command.MOVE));
-				horizSign = horizSign * Mathf.Sign (rigidbody.velocity.x);
-				SetAccel(AccelType.MOVE, rigidbody.velocity.x * horizSign, null, null, maneuverability);
-			}
-			SetTimer(TimerType.JUMP, 0);					// start jump timer
-			SetTimerMax(TimerType.JUMP, MIN_JUMP_FRAMES);	// set jump to short hop duration
-		}
-
 		// On jump command end ...
 		if (controls.ConsumeCommandEnd(Controls.Command.JUMP))
 			if (HasState(PlayerState.MIDAIR))
@@ -394,7 +406,9 @@ public class PlayerController : MonoBehaviour
             RemoveState(PlayerState.RISING);
             SetPlatformCollision(true); //enable collisions so we don't phase through
         }
-        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING)) //check to see if we're rising; only returns true when we've entered the rising state
+
+        //check to see if we're rising; only returns true when we've entered the rising state
+        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING)) 
         {
             RemoveState(PlayerState.FALLING);
             AddState(PlayerState.RISING);
@@ -439,7 +453,7 @@ public class PlayerController : MonoBehaviour
             
 
         }
-        if (CanLedgeDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //dropping from a ledge grab
+        if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
             AddState(PlayerState.FALLING);
             AddState(PlayerState.MIDAIR);
@@ -447,7 +461,6 @@ public class PlayerController : MonoBehaviour
             jumpCount = 0; // can't use ledge grabs to get more jumps
         }
     }
-
     void SetPlatformCollision(bool toggle)
     {
         foreach (Collider platformCollider in platformColliders)
