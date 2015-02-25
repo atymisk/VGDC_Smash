@@ -496,6 +496,7 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.STAGEGROUNDED);
         RemoveState(PlayerState.LEDGEGRABBING);
         RemoveState(PlayerState.ATTACKING);
+        theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
     }
 

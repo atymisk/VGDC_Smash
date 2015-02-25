@@ -14,12 +14,12 @@ public class Tags : MonoBehaviour {
 public class Triggers : MonoBehaviour
 {
     public const string LedgeGrabEnter = "LedgeGrabEnter";
-    public const string InputDuck = "InputDuck";
     public const string LedgeGrabExit = "LedgeGrabExit";
     public const string StageEnter = "StageEnter";
     public const string StageExit = "StageExit";
     public const string PlatformEnter = "PlatformEnter";
     public const string PlatformExit = "PlatformExit";
+    public const string Death = "Death";
 }
 
 public class States : MonoBehaviour
