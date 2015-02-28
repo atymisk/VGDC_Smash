@@ -66,6 +66,7 @@ public class PlayerController : MonoBehaviour
 	private Dictionary<TimerType, int> timerMaxes;			// collection of timer maximum values
 	private Controls controls;								// reference to input handler
     private PlayerStateScript stateScript;                  // reference to state script
+    private AnimatorManager animatorManager;                // reference to animator handler
 	private int jumpCount;									// number of jumps
 	private Vector2 prevPos;
 	private Vector2 prevVel;
@@ -85,6 +86,7 @@ public class PlayerController : MonoBehaviour
         stateScript = GetComponent<PlayerStateScript>();
         thisCollider = GetComponent<CapsuleCollider>();
         theStateMachine = GetComponent<Animator>();
+        animatorManager = GetComponent<AnimatorManager>();
 		// Initialize accelerations.
 		// @TODO: maybe move these into an entirely different acceleration handling class?
 		accelerations = new Dictionary<AccelType, Acceleration>();
@@ -268,7 +270,7 @@ public class PlayerController : MonoBehaviour
     {
         if (HasState(PlayerState.LEDGEGRABBING))
         {
-            if (InState(States.LedgeGrabbing))
+            if (InState(AnimatorManager.State.LEDGEGRABBING))
             {
                 theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
             }
@@ -317,7 +319,7 @@ public class PlayerController : MonoBehaviour
 	void RemoveState(PlayerState state) { states.Remove(state); }
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
-    bool InState(string state) { return theStateMachine.GetCurrentAnimatorStateInfo(0).IsName(state); }
+    bool InState(AnimatorManager.State state) { return animatorManager.InState(state); }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
 
 	void UpdatePreviousVectors()
@@ -352,7 +354,7 @@ public class PlayerController : MonoBehaviour
 		// While moving ...
         if (controls.GetCommand(Controls.Command.MOVE) && CanMove())
         {		// if move command is being issued ...
-			if (InState(States.Falling) || InState(States.Rising))	// flat movement speed in midair
+			if (InState(AnimatorManager.State.MIDAIR))	// flat movement speed in midair
 				SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
 			else {
 				if (magnitude > 0.98f) {				 // dashing speed
@@ -364,7 +366,7 @@ public class PlayerController : MonoBehaviour
 					SetAccel(AccelType.MOVE, minRunSpeed * sign, null, null, groundAcceleration);
 			}
 		} else {					// if not moving ...
-            if (InState(States.Falling) || InState(States.Rising))							// in midair apply midair drag
+            if (InState(AnimatorManager.State.MIDAIR))							// in midair apply midair drag
 				SetAccel(AccelType.MOVE, 0f, null, null, midairDrag);
 			else {
 				SetAccel(AccelType.MOVE, 0f, null, null, groundDrag);	// on ground apply ground drag
@@ -378,7 +380,7 @@ public class PlayerController : MonoBehaviour
         {
             accelerations[AccelType.FALL].Reset();			// reset gravity when another jump starts. for repeated accelerated falls.
             SetVelocity(null, 0f, null);					// reset vertical velocity for new jump
-            if (InState(States.Falling) || InState(States.Rising))
+            if (InState(AnimatorManager.State.MIDAIR))
             {				// give maneuverability burst while starting a jump in midair
                 float horizSign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.MOVE));
                 horizSign = horizSign * Mathf.Sign(rigidbody.velocity.x);
@@ -408,7 +410,7 @@ public class PlayerController : MonoBehaviour
 
 		// On jump command end ...
 		if (controls.ConsumeCommandEnd(Controls.Command.JUMP))
-            if (InState(States.Falling) || InState(States.Rising))
+            if (InState(AnimatorManager.State.MIDAIR))
 				jumpCount++;
     }
 	void DoFall()

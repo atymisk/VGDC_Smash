@@ -21,11 +21,3 @@ public class Triggers : MonoBehaviour
     public const string PlatformExit = "PlatformExit";
     public const string Death = "Death";
 }
-
-public class States : MonoBehaviour
-{
-    public const string LedgeGrabbing = "LedgeGrabbing";
-    public const string StageGrounded = "StageGrounded";
-    public const string Rising = "Rising";
-    public const string Falling = "Falling";
-}
