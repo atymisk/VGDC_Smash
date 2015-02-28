@@ -286,8 +286,10 @@ public class PlayerController : MonoBehaviour
             AddState(PlayerState.LEDGEGRABBING);
             theStateMachine.SetTrigger(Triggers.LedgeGrabEnter);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
-            if(jumpCount < 1)
+            if (jumpCount > 1)
+            {
                 jumpCount = 1;								// let the player jump out of it
+            }
             ResetAccel(AccelType.FALL);					// return fall acceleration to natural value 
             EnableAccel(AccelType.FALL, false);         // disable falling while hanging
             SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
@@ -303,9 +305,9 @@ public class PlayerController : MonoBehaviour
     bool CanAttack() { return !HasState(PlayerState.ATTACKING); }  // TODO : timer between attacks?
     bool CanMove() { return InState(AnimatorManager.State.CANMOVE); }
 	bool CanJump () { return jumpCount < maxJumps; }
-	bool CanFall () { return HasState(PlayerState.MIDAIR); }
-	bool CanDrop () { return HasState(PlayerState.MIDAIR); }
-    bool CanPlatformDrop() { return HasState(PlayerState.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
+	bool CanFall () { return InState(AnimatorManager.State.MIDAIR); }
+    bool CanDrop() { return InState(AnimatorManager.State.MIDAIR); }
+    bool CanPlatformDrop() { return InState(AnimatorManager.State.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
     bool CanLedgeDrop() { return InState(AnimatorManager.State.LEDGEGRABBING); }
 
 	// UTILITY FUNCTIONS
@@ -414,22 +416,24 @@ public class PlayerController : MonoBehaviour
     }
 	void DoFall()
 	{
-		// the below returns true when we have STARTED to fall
-        if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING))
+        if (InState(AnimatorManager.State.MIDAIR) || InState(AnimatorManager.State.GROUNDED))
         {
-            AddState(PlayerState.FALLING);
-            RemoveState(PlayerState.RISING);
-            SetPlatformCollision(true); //enable collisions so we don't phase through
-        }
+            // the below returns true when we have STARTED to fall
+            if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            {
+                AddState(PlayerState.FALLING);
+                RemoveState(PlayerState.RISING);
+                SetPlatformCollision(true); //enable collisions so we don't phase through
+            }
 
-        //check to see if we're rising; only returns true when we've entered the rising state
-        else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED) && !HasState(PlayerState.LEDGEGRABBING)) 
-        {
-            RemoveState(PlayerState.FALLING);
-            AddState(PlayerState.RISING);
-            SetPlatformCollision(false); //disable collisions so we can phase through
+            //check to see if we're rising; only returns true when we've entered the rising state
+            else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            {
+                RemoveState(PlayerState.FALLING);
+                AddState(PlayerState.RISING);
+                SetPlatformCollision(false); //disable collisions so we can phase through
+            }
         }
-
 		if (CanFall()) {
             
 		}

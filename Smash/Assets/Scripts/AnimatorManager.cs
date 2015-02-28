@@ -16,6 +16,7 @@ public class AnimatorManager : MonoBehaviour {
         LEDGEDROPPING,
         //generalized states
         MIDAIR,
+        GROUNDED,
 
         //possibility states
         CANMOVE,
@@ -42,6 +43,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, } },
+        { State.GROUNDED,         new string[] { StageGrounded, PlatformGrounded, } },
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded} },
 
