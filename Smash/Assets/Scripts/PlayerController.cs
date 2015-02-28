@@ -268,19 +268,18 @@ public class PlayerController : MonoBehaviour
 	void GrabEdgeCollideEnter(){}
 	void GrabEdgeCollideExit()
     {
-        if (HasState(PlayerState.LEDGEGRABBING))
+        if (InState(AnimatorManager.State.LEDGEGRABBING) || InState(AnimatorManager.State.LEDGEDROPPING))
+            theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
+        if (InState(AnimatorManager.State.LEDGEGRABBING))
         {
-            if (InState(AnimatorManager.State.LEDGEGRABBING))
-            {
-                theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
-            }
+            
             RemoveState(PlayerState.LEDGEGRABBING); 
             EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
         }
     }
     void GrabEdgeCollideStay(Collider other)
     {
-        if (HasState(PlayerState.FALLING) && !HasState(PlayerState.LEDGEGRABBING)) //start a ledge grab
+        if (InState(AnimatorManager.State.FALLING)) //start a ledge grab
         {
             RemoveState(PlayerState.FALLING);   // reset states
             RemoveState(PlayerState.MIDAIR);
@@ -302,12 +301,12 @@ public class PlayerController : MonoBehaviour
 
 	// STATE CHECKERS
     bool CanAttack() { return !HasState(PlayerState.ATTACKING); }  // TODO : timer between attacks?
-    bool CanMove() { return !HasState(PlayerState.LEDGEGRABBING); }
+    bool CanMove() { return InState(AnimatorManager.State.CANMOVE); }
 	bool CanJump () { return jumpCount < maxJumps; }
 	bool CanFall () { return HasState(PlayerState.MIDAIR); }
 	bool CanDrop () { return HasState(PlayerState.MIDAIR); }
     bool CanPlatformDrop() { return HasState(PlayerState.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
-    bool CanLedgeDrop() { return HasState(PlayerState.LEDGEGRABBING); }
+    bool CanLedgeDrop() { return InState(AnimatorManager.State.LEDGEGRABBING); }
 
 	// UTILITY FUNCTIONS
 	bool TimerDone(TimerType timer) { return timers[timer] >= timerMaxes[timer]; }
