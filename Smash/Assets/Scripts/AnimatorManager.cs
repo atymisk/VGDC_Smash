@@ -2,6 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/**
+ * AnimatorManager: This is a service class that acts as an interface for state setting and checking. State logic should be done
+ * 					outside of this class.
+ * 
+ * TODO : using triggers for now, remember if state machine bugs start to happen check the triggers.
+ */
 public class AnimatorManager : MonoBehaviour {
     
     public enum State
@@ -31,7 +37,7 @@ public class AnimatorManager : MonoBehaviour {
     //transition states
     private const string LedgeDropping = "LedgeDropping";
 
-
+	// Dictionary of states linked to their substates
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
     { 
         { State.LEDGEGRABBING,  new string[] { LedgeGrabbing, } },
@@ -59,8 +65,10 @@ public class AnimatorManager : MonoBehaviour {
 	
 	}
 
+	// InState: check if animator is in a given state. Can check on multiple substates.
     public bool InState(State state)
     {
+		// check each substate
         foreach (string stateName in stateStrings[state])
         {
             if(theStateMachine.GetCurrentAnimatorStateInfo(0).IsName(stateName))

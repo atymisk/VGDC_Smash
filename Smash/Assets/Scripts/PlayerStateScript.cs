@@ -14,11 +14,6 @@ public class PlayerStateScript : MonoBehaviour {
 		// controls = GetComponent<Controls>(); // not needed anymore
         controller = GetComponent<PlayerController>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	    
-	}
 
     public void TakeHit(float damage, Vector3 hitOrigin)
     {
@@ -48,14 +43,6 @@ public class PlayerStateScript : MonoBehaviour {
 
     }
 
-	void FixedUpdate()
-	{
-		//if (controls.ConsumeCommandStart(Controls.Command.ATTACK))
-		//{
-            //Debug.Log("attack");
-			//TakeHit (100, new Vector3(0,0,0));
-		//}
-	}
     float GetCurrentDamage()
     {
         return currentDamage;

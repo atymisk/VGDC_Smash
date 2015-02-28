@@ -222,7 +222,8 @@ public class PlayerController : MonoBehaviour
     }
 
 	// COLLISION HANDLERS
-
+	
+	// PlayerCollideEnter : TODO: handle different attacks based on button input and player state.
     void PlayerCollideEnter(Collider other)
     {
         if (HasState(PlayerState.ATTACKING))
