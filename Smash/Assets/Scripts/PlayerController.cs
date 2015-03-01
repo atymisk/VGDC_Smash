@@ -145,7 +145,7 @@ public class PlayerController : MonoBehaviour
         DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
-
+        DoTriggerClear();
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
 			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
@@ -213,15 +213,14 @@ public class PlayerController : MonoBehaviour
 	// PlayerCollideEnter : TODO: handle different attacks based on button input and player state.
     void PlayerCollideEnter(Collider other)
     {
-        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK))
-        {
-            other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
-            didDamage = true;
-        }
         PlayerController otherController = other.transform.parent.GetComponent<PlayerController>();
-        if (otherController.InState(AnimatorManager.State.ATTACKING))
+
+        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK) && !otherController.InState(AnimatorManager.State.INVULNERABLE))
         {
-            theStateMachine.SetTrigger(Triggers.ReelingEnter);
+            didDamage = true;
+
+            other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+            other.transform.parent.GetComponent <Animator>().SetTrigger(Triggers.ReelingEnter);
             other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
         }
     }
@@ -286,7 +285,7 @@ public class PlayerController : MonoBehaviour
 
 	// STATE CHECKERS
     bool CanMove() { return InState(AnimatorManager.State.CANMOVE); }
-	bool CanJump () { return jumpCount < maxJumps; }
+	bool CanJump () { return jumpCount < maxJumps && InState(AnimatorManager.State.CANJUMP); }
 	bool CanFall () { return InState(AnimatorManager.State.MIDAIR); }
     bool CanDrop() { return InState(AnimatorManager.State.MIDAIR); }
     bool CanPlatformDrop() { return InState(AnimatorManager.State.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
@@ -452,6 +451,25 @@ public class PlayerController : MonoBehaviour
             jumpCount = 0; // can't use ledge grabs to get more jumps
         }
     }
+
+    void DoTriggerClear()
+    {
+        if (InState(AnimatorManager.State.REELING))
+        {
+            theStateMachine.ResetTrigger(Triggers.StageExit);
+            theStateMachine.ResetTrigger(Triggers.PlatformExit);
+        }
+        else if (InState(AnimatorManager.State.DEAD))
+        {
+            theStateMachine.ResetTrigger(Triggers.StageExit);
+            theStateMachine.ResetTrigger(Triggers.StageEnter);
+            theStateMachine.ResetTrigger(Triggers.PlatformExit);
+            theStateMachine.ResetTrigger(Triggers.PlatformEnter);
+            theStateMachine.ResetTrigger(Triggers.LedgeGrabExit);
+            theStateMachine.ResetTrigger(Triggers.LedgeGrabEnter);
+        }
+    }
+
     void SetPlatformCollision(bool toggle)
     {
         foreach (Collider platformCollider in platformColliders)
@@ -470,6 +488,7 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.FALLING);           // reset all other previous states
         RemoveState(PlayerState.RISING);            
         RemoveState(PlayerState.PLATFORMGROUNDED);
+        
         theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
     }

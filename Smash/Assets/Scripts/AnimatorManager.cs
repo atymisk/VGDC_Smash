@@ -19,6 +19,8 @@ public class AnimatorManager : MonoBehaviour {
         FALLING,
         TUMBLING,
         REELING,
+        MOSTLYDEAD,
+        ALLDEAD,
 
         //transition states
         LEDGEDROPPING,
@@ -30,9 +32,12 @@ public class AnimatorManager : MonoBehaviour {
         GROUNDED,
         GROUNDATTACK,
         ATTACKING,
+        DEAD,
 
         //possibility states
         CANMOVE,
+        CANJUMP,
+        INVULNERABLE,
     }
 
     // put the animator state string names here for autocomplete and stuff
@@ -44,6 +49,12 @@ public class AnimatorManager : MonoBehaviour {
     private const string Tumbling = "Tumbling";
     private const string Reeling = "Reeling";
 
+    private const string MostlyDead = "MostlyDead";
+    private const string AllDead = "AllDead";
+    //Miracle Max: There's a big difference between mostly dead and all dead. Mostly dead is slightly alive. With all dead, well, with all dead there's usually only one thing you can do.
+    //Inigo Montoya: What's that?
+    //Miracle Max: Go through his clothes and look for loose change.
+
     //attacks
     private const string GroundAttack = "GroundAttack";
     private const string Lag = "Lag";
@@ -51,7 +62,7 @@ public class AnimatorManager : MonoBehaviour {
     //transition states
     private const string LedgeDropping = "LedgeDropping";
     private const string PlatformDropping = "PlatformDropping";
-    private const string ReelingTriggerClear = "ReelingTriggerClear";
+
 	// Dictionary of states linked to their substates
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
     { 
@@ -61,9 +72,13 @@ public class AnimatorManager : MonoBehaviour {
         { State.RISING,         new string[] { Rising, } },
         { State.FALLING,        new string[] { Falling, } },
         { State.TUMBLING,       new string[] { Tumbling, } },
-        { State.REELING,        new string[] { Reeling, ReelingTriggerClear} },
+        { State.REELING,        new string[] { Reeling, } },
+        { State.MOSTLYDEAD,     new string[] { MostlyDead, } },
+        { State.ALLDEAD,        new string[] { AllDead, } },
+
         //attacks
         { State.GROUNDATTACK,   new string[] { GroundAttack, } },
+
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
         { State.LAG,            new string[] { Lag,} },
@@ -71,9 +86,13 @@ public class AnimatorManager : MonoBehaviour {
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
         { State.GROUNDED,       new string[] { StageGrounded, PlatformGrounded, } },
-        { State.ATTACKING,      new string[] { GroundAttack, } },     
+        { State.ATTACKING,      new string[] { GroundAttack, } },   
+        { State.DEAD,           new string[] { MostlyDead, AllDead, } },
+
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, } },
+        { State.CANJUMP,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
+        { State.INVULNERABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, } },
 
     };
     private Animator theStateMachine;
