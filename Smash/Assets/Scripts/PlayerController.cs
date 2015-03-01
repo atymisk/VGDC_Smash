@@ -10,7 +10,6 @@ public class PlayerController : MonoBehaviour
 		FALLING,
         PLATFORMGROUNDED,
         RISING,
-        ATTACKING,
 	};
 
 	public enum AccelType
@@ -71,6 +70,9 @@ public class PlayerController : MonoBehaviour
     private Collider thisCollider; //reference to this player's main physics collider
     private Transform platform; // may be null until initialized; DO NOT USE TO CHECK IF GROUNDED ON A PLATFORM!! THAT"S WHY WE HAVE THE ENUMS!!
     private List<Collider> platformColliders; // reference to every platform collider, so that they can be disabled when jumping up
+
+    private bool didDamage = false;
+
 	// INITIALIZE
 	void Awake ()
 	{
@@ -143,7 +145,6 @@ public class PlayerController : MonoBehaviour
         DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
-        DoNeutralAttack();
 
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
@@ -171,7 +172,7 @@ public class PlayerController : MonoBehaviour
 				BoundaryCollideEnter();
 				break;
 			case Tags.GrabEdge :
-				GrabEdgeCollideEnter();
+				GrabEdgeCollideEnter(other);
 				break;
 			case Tags.StopEdge :
 				StopEdgeCollideEnter();
@@ -206,27 +207,16 @@ public class PlayerController : MonoBehaviour
 			break;
 		}
 	}
-    void OnTriggerStay(Collider other)
-    {
-        switch (other.tag)
-        {
-            case Tags.GrabEdge:
-                GrabEdgeCollideStay(other); //it's in OnTriggerStay instead of OnTriggerEnter or Exit so that it can trigger at the top of the parabola.
-			break;
-            default:
-                break;
-        }
-    }
 
 	// COLLISION HANDLERS
 	
 	// PlayerCollideEnter : TODO: handle different attacks based on button input and player state.
     void PlayerCollideEnter(Collider other)
     {
-        if (HasState(PlayerState.ATTACKING))
+        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK))
         {
             other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
-            RemoveState(PlayerState.ATTACKING); //can't do multiple damage
+            didDamage = true;
         }
     }
 
@@ -259,7 +249,6 @@ public class PlayerController : MonoBehaviour
         stateScript.Die();                          // kill the player
 	}
 	void BoundaryCollideExit(){}
-	void GrabEdgeCollideEnter(){}
 	void GrabEdgeCollideExit()
     {
         if (InState(AnimatorManager.State.LEDGEGRABBING) || InState(AnimatorManager.State.LEDGEDROPPING))
@@ -267,9 +256,9 @@ public class PlayerController : MonoBehaviour
         if (InState(AnimatorManager.State.LEDGEGRABBING))
             EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
     }
-    void GrabEdgeCollideStay(Collider other)
+    void GrabEdgeCollideEnter(Collider other)
     {
-        if (InState(AnimatorManager.State.FALLING)) //start a ledge grab
+        if (InState(AnimatorManager.State.FALLING) && currVel.y < -8) //start a ledge grab
         {
             RemoveState(PlayerState.FALLING);   // reset states
             theStateMachine.SetTrigger(Triggers.LedgeGrabEnter);
@@ -290,7 +279,6 @@ public class PlayerController : MonoBehaviour
 	void StopEdgeCollideExit(){}
 
 	// STATE CHECKERS
-    bool CanAttack() { return !HasState(PlayerState.ATTACKING); }  // TODO : timer between attacks?
     bool CanMove() { return InState(AnimatorManager.State.CANMOVE); }
 	bool CanJump () { return jumpCount < maxJumps; }
 	bool CanFall () { return InState(AnimatorManager.State.MIDAIR); }
@@ -435,14 +423,6 @@ public class PlayerController : MonoBehaviour
 	{
 		print ("Smash");
 	}
-	void DoNeutralAttack ()
-	{
-        if (CanAttack() && controls.ConsumeCommandStart(Controls.Command.ATTACK))
-        {
-            AddState(PlayerState.ATTACKING);
-            // TODO : timer to end the attacking state
-        }
-	}
 
     void DoPlatformDrop()
     {
@@ -484,7 +464,6 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.FALLING);           // reset all other previous states
         RemoveState(PlayerState.RISING);            
         RemoveState(PlayerState.PLATFORMGROUNDED);
-        RemoveState(PlayerState.ATTACKING);
         theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
     }
@@ -497,5 +476,10 @@ public class PlayerController : MonoBehaviour
         Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_surface").GetComponent<MeshCollider>(), false);
         Physics.IgnoreCollision(thisCollider, otherTransform.FindChild("stage_model").GetComponent<BoxCollider>(), false);
 
+    }
+
+    public void startAttack()
+    {
+        didDamage = false;
     }
 }

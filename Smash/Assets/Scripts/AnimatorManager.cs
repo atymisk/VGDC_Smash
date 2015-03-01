@@ -21,13 +21,17 @@ public class AnimatorManager : MonoBehaviour {
         //transition states
         LEDGEDROPPING,
         PLATFORMDROPPING,
+        LAG,
+
         //generalized states
         MIDAIR,
         GROUNDED,
+        GROUNDATTACK,
 
         //possibility states
         CANMOVE,
     }
+
     // put the animator state string names here for autocomplete and stuff
     private const string LedgeGrabbing  = "LedgeGrabbing";
     private const string StageGrounded  = "StageGrounded";
@@ -35,9 +39,14 @@ public class AnimatorManager : MonoBehaviour {
     private const string Rising = "Rising";
     private const string Falling = "Falling";
 
+    //attacks
+    private const string GroundAttack = "GroundAttack";
+    private const string Lag = "Lag";
+
     //transition states
     private const string LedgeDropping = "LedgeDropping";
     private const string PlatformDropping = "PlatformDropping";
+
 	// Dictionary of states linked to their substates
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
     { 
@@ -46,11 +55,17 @@ public class AnimatorManager : MonoBehaviour {
         { State.PLATFORMGROUNDED, new string[] { PlatformGrounded, } },
         { State.RISING,         new string[] { Rising, } },
         { State.FALLING,        new string[] { Falling, } },
+
+        //attacks
+        { State.GROUNDATTACK,   new string[] { GroundAttack, } },
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
+        { State.LAG,            new string[] { Lag,} },
+
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, } },
         { State.GROUNDED,         new string[] { StageGrounded, PlatformGrounded, } },
+
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded} },
 
