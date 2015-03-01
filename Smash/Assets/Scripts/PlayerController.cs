@@ -218,6 +218,12 @@ public class PlayerController : MonoBehaviour
             other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
             didDamage = true;
         }
+        PlayerController otherController = other.transform.parent.GetComponent<PlayerController>();
+        if (otherController.InState(AnimatorManager.State.ATTACKING))
+        {
+            theStateMachine.SetTrigger(Triggers.ReelingEnter);
+            other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
+        }
     }
 
 	void StageCollideEnter()
@@ -296,7 +302,7 @@ public class PlayerController : MonoBehaviour
 	void RemoveState(PlayerState state) { states.Remove(state); }
 	void AddState(PlayerState state) { states.Add(state); }
 	bool HasState(PlayerState state) { return states.Contains(state); }
-    bool InState(AnimatorManager.State state) { return animatorManager.InState(state); }
+    public bool InState(AnimatorManager.State state) { return animatorManager.InState(state); }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
 
 	void UpdatePreviousVectors()

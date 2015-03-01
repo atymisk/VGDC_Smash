@@ -20,4 +20,5 @@ public class Triggers : MonoBehaviour
     public const string PlatformEnter = "PlatformEnter";
     public const string PlatformExit = "PlatformExit";
     public const string Death = "Death";
+    public const string ReelingEnter = "ReelingEnter";
 }
