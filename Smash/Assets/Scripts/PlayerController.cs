@@ -164,7 +164,8 @@ public class PlayerController : MonoBehaviour
             case Tags.Platform :
                 StageCollideEnter();
                 PlatformCollideEnter(other);
-                theStateMachine.SetTrigger(Triggers.PlatformEnter);
+
+                
                 break;
 			case Tags.Stage :
 				StageCollideEnter();
@@ -190,7 +191,7 @@ public class PlayerController : MonoBehaviour
         case Tags.Platform : //non-platform-drop (normal) exiting
 			StageCollideExit();
             PlatformCollideExit();
-            theStateMachine.SetTrigger(Triggers.PlatformExit);
+            
 			break;
 		case Tags.Stage :
 			StageCollideExit();
@@ -235,30 +236,26 @@ public class PlayerController : MonoBehaviour
 
 	void StageCollideEnter()
 	{
-		RemoveState(PlayerState.MIDAIR);			// player is no longer midair
-		RemoveState(PlayerState.FALLING);			// player is no longer falling
-        RemoveState(PlayerState.RISING);            // player is no longer rising
-        AddState(PlayerState.STAGEGROUNDED);        // player is grounded on a stage
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        
 	}
     
 	void StageCollideExit()
 	{
-		AddState(PlayerState.MIDAIR);				// player is midair
-        RemoveState(PlayerState.STAGEGROUNDED);     // player is no longer grounded on a stage
 	}
 
     void PlatformCollideEnter(Collider other)
     {
         platform = other.transform.parent; // update the reference to the platform's collider
-        AddState(PlayerState.PLATFORMGROUNDED);
+        if(!InState(AnimatorManager.State.PLATFORMDROP))
+            theStateMachine.SetTrigger(Triggers.PlatformEnter);
+        theStateMachine.SetBool("PosVel", false);
     }
 
     void PlatformCollideExit()
     {
-        RemoveState(PlayerState.PLATFORMGROUNDED);
+        if (!InState(AnimatorManager.State.PLATFORMBOUNCE) && !InState(AnimatorManager.State.PLATFORMDROP))
+            theStateMachine.SetTrigger(Triggers.PlatformExit);
     }
 
 	void BoundaryCollideEnter()
@@ -308,7 +305,7 @@ public class PlayerController : MonoBehaviour
 	bool CanJump () { return jumpCount < maxJumps; }
 	bool CanFall () { return InState(AnimatorManager.State.MIDAIR); }
     bool CanDrop() { return InState(AnimatorManager.State.MIDAIR); }
-    bool CanPlatformDrop() { return InState(AnimatorManager.State.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
+    bool CanPlatformDrop() { return InState(AnimatorManager.State.CANPLATFORMDROP) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
     bool CanLedgeDrop() { return InState(AnimatorManager.State.LEDGEGRABBING); }
 
 	// UTILITY FUNCTIONS
@@ -335,7 +332,7 @@ public class PlayerController : MonoBehaviour
 	{
 		currVel.x = (transform.position.x - prevPos.x) / Time.fixedDeltaTime;
 		currVel.y = (transform.position.y - prevPos.y) / Time.fixedDeltaTime;
-        theStateMachine.SetFloat("currVel.y", currVel.y);
+        theStateMachine.SetBool("PosVel", (currVel.y > 0));
 	}
     void UpdateTimer(TimerType timer)
 	{
@@ -417,22 +414,16 @@ public class PlayerController : MonoBehaviour
     }
 	void DoFall()
 	{
-        if (InState(AnimatorManager.State.MIDAIR) || InState(AnimatorManager.State.GROUNDED))
+        if (InState(AnimatorManager.State.MIDAIR))
         {
-            // the below returns true when we have STARTED to fall
-            if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            if (InState(AnimatorManager.State.RISING))
             {
-                AddState(PlayerState.FALLING);
-                RemoveState(PlayerState.RISING);
-                SetPlatformCollision(true); //enable collisions so we don't phase through
+                SetPlatformCollision(false); //enable collisions so we don't phase through
             }
 
-            //check to see if we're rising; only returns true when we've entered the rising state
-            else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            else
             {
-                RemoveState(PlayerState.FALLING);
-                AddState(PlayerState.RISING);
-                SetPlatformCollision(false); //disable collisions so we can phase through
+                SetPlatformCollision(true); //disable collisions so we can phase through
             }
         }
 		if (CanFall()) {

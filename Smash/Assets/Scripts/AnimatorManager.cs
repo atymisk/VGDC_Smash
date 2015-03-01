@@ -20,17 +20,22 @@ public class AnimatorManager : MonoBehaviour {
 
         //transition states
         LEDGEDROPPING,
+        PLATFORMBOUNCE,
+        PLATFORMDROP,
         //generalized states
         MIDAIR,
         GROUNDED,
 
         //possibility states
         CANMOVE,
+        CANPLATFORMDROP,
     }
     // put the animator state string names here for autocomplete and stuff
     private const string LedgeGrabbing  = "LedgeGrabbing";
     private const string StageGrounded  = "StageGrounded";
     private const string PlatformGrounded = "PlatformGrounded";
+    private const string PlatformBounce = "PlatformBounce";
+    private const string PlatformDrop = "PlatformDrop";
     private const string Rising = "Rising";
     private const string Falling = "Falling";
 
@@ -47,11 +52,14 @@ public class AnimatorManager : MonoBehaviour {
         { State.FALLING,        new string[] { Falling, } },
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
+        { State.PLATFORMBOUNCE, new string[] { PlatformBounce, } },
+        { State.PLATFORMDROP,   new string[] { PlatformDrop, } },
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, } },
-        { State.GROUNDED,         new string[] { StageGrounded, PlatformGrounded, } },
+        { State.GROUNDED,         new string[] { StageGrounded, PlatformGrounded, PlatformBounce} },
         //possibility states
-        { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded} },
+        { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, PlatformBounce, } },
+        { State.CANPLATFORMDROP,new string[] { PlatformGrounded, PlatformBounce, } },
 
     };
     private Animator theStateMachine;
