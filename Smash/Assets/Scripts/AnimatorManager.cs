@@ -20,6 +20,7 @@ public class AnimatorManager : MonoBehaviour {
 
         //transition states
         LEDGEDROPPING,
+        PLATFORMDROPPING,
         //generalized states
         MIDAIR,
         GROUNDED,
@@ -36,7 +37,7 @@ public class AnimatorManager : MonoBehaviour {
 
     //transition states
     private const string LedgeDropping = "LedgeDropping";
-
+    private const string PlatformDropping = "PlatformDropping";
 	// Dictionary of states linked to their substates
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
     { 
@@ -48,7 +49,7 @@ public class AnimatorManager : MonoBehaviour {
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
         //generalized states
-        { State.MIDAIR,         new string[] { Rising, Falling, } },
+        { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, } },
         { State.GROUNDED,         new string[] { StageGrounded, PlatformGrounded, } },
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded} },

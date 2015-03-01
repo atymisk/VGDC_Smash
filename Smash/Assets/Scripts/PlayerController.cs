@@ -7,12 +7,9 @@ public class PlayerController : MonoBehaviour
 {
 	private enum PlayerState
 	{
-		MIDAIR,
 		FALLING,
         PLATFORMGROUNDED,
-        STAGEGROUNDED,
         RISING,
-        LEDGEGRABBING,
         ATTACKING,
 	};
 
@@ -78,7 +75,7 @@ public class PlayerController : MonoBehaviour
 	void Awake ()
 	{
 		// Initialize states. start in midair.
-		states = new HashSet<PlayerState> {PlayerState.MIDAIR};
+		states = new HashSet<PlayerState> {PlayerState.FALLING};
 
 		// Get reference to control script
 		// @TODO: move this outside of player game object and into a MatchManager or something
@@ -235,10 +232,8 @@ public class PlayerController : MonoBehaviour
 
 	void StageCollideEnter()
 	{
-		RemoveState(PlayerState.MIDAIR);			// player is no longer midair
 		RemoveState(PlayerState.FALLING);			// player is no longer falling
         RemoveState(PlayerState.RISING);            // player is no longer rising
-        AddState(PlayerState.STAGEGROUNDED);        // player is grounded on a stage
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         
@@ -246,8 +241,6 @@ public class PlayerController : MonoBehaviour
     
 	void StageCollideExit()
 	{
-		AddState(PlayerState.MIDAIR);				// player is midair
-        RemoveState(PlayerState.STAGEGROUNDED);     // player is no longer grounded on a stage
 	}
 
     void PlatformCollideEnter(Collider other)
@@ -272,19 +265,13 @@ public class PlayerController : MonoBehaviour
         if (InState(AnimatorManager.State.LEDGEGRABBING) || InState(AnimatorManager.State.LEDGEDROPPING))
             theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
         if (InState(AnimatorManager.State.LEDGEGRABBING))
-        {
-            
-            RemoveState(PlayerState.LEDGEGRABBING); 
             EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
-        }
     }
     void GrabEdgeCollideStay(Collider other)
     {
         if (InState(AnimatorManager.State.FALLING)) //start a ledge grab
         {
             RemoveState(PlayerState.FALLING);   // reset states
-            RemoveState(PlayerState.MIDAIR);
-            AddState(PlayerState.LEDGEGRABBING);
             theStateMachine.SetTrigger(Triggers.LedgeGrabEnter);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
             if (jumpCount > 1)
@@ -417,10 +404,10 @@ public class PlayerController : MonoBehaviour
     }
 	void DoFall()
 	{
-        if (InState(AnimatorManager.State.MIDAIR) || InState(AnimatorManager.State.GROUNDED))
+        if (!HasState(PlayerState.PLATFORMGROUNDED) && (InState(AnimatorManager.State.MIDAIR) || InState(AnimatorManager.State.GROUNDED)))
         {
             // the below returns true when we have STARTED to fall
-            if (currVel.y < 0f && !HasState(PlayerState.FALLING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            if (currVel.y < 0f && !HasState(PlayerState.FALLING))
             {
                 AddState(PlayerState.FALLING);
                 RemoveState(PlayerState.RISING);
@@ -428,7 +415,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //check to see if we're rising; only returns true when we've entered the rising state
-            else if (currVel.y > 0f && !HasState(PlayerState.RISING) && !HasState(PlayerState.PLATFORMGROUNDED))
+            else if (currVel.y > 0f && !HasState(PlayerState.RISING))
             {
                 RemoveState(PlayerState.FALLING);
                 AddState(PlayerState.RISING);
@@ -475,7 +462,6 @@ public class PlayerController : MonoBehaviour
         if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
             AddState(PlayerState.FALLING);
-            AddState(PlayerState.MIDAIR);
             EnableAccel(AccelType.FALL, true);
             jumpCount = 0; // can't use ledge grabs to get more jumps
         }
@@ -494,13 +480,10 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(0, 10, 0);	// reset player position
         jumpCount = 0;								// reset jump count
         ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        AddState(PlayerState.MIDAIR);				// player should be in midair and falling   
         SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
         RemoveState(PlayerState.FALLING);           // reset all other previous states
         RemoveState(PlayerState.RISING);            
         RemoveState(PlayerState.PLATFORMGROUNDED);
-        RemoveState(PlayerState.STAGEGROUNDED);
-        RemoveState(PlayerState.LEDGEGRABBING);
         RemoveState(PlayerState.ATTACKING);
         theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
