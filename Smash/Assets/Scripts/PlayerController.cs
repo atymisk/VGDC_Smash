@@ -225,20 +225,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-	void StageCollideEnter()
+	void StageCollideEnter() // general stuff for entering a stage
 	{
 		RemoveState(PlayerState.FALLING);			// player is no longer falling
         RemoveState(PlayerState.RISING);            // player is no longer rising
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        
+        if (InState(AnimatorManager.State.AIRINCAPACITATED)) // going to go into ground incapacitated
+        {
+            ResetAccel(AccelType.MOVE);
+            SetVelocity(0f, 0f, 0f);
+        }
 	}
     
 	void StageCollideExit()
 	{
 	}
 
-    void PlatformCollideEnter(Collider other)
+    void PlatformCollideEnter(Collider other) // stuff only specific to entering a platform
     {
         platform = other.transform.parent; // update the reference to the platform's collider
         AddState(PlayerState.PLATFORMGROUNDED);

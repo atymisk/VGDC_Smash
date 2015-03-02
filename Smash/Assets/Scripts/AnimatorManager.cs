@@ -21,11 +21,14 @@ public class AnimatorManager : MonoBehaviour {
         REELING,
         MOSTLYDEAD,
         ALLDEAD,
+        DOWNED,
 
         //transition states
         LEDGEDROPPING,
         PLATFORMDROPPING,
         LAG,
+        UNCONSCIOUS,
+        RECOVERING,
 
         //generalized states
         MIDAIR,
@@ -33,6 +36,8 @@ public class AnimatorManager : MonoBehaviour {
         GROUNDATTACK,
         ATTACKING,
         DEAD,
+        GROUNDINCAPACITATED,
+        AIRINCAPACITATED,
 
         //possibility states
         CANMOVE,
@@ -54,6 +59,8 @@ public class AnimatorManager : MonoBehaviour {
     //Miracle Max: There's a big difference between mostly dead and all dead. Mostly dead is slightly alive. With all dead, well, with all dead there's usually only one thing you can do.
     //Inigo Montoya: What's that?
     //Miracle Max: Go through his clothes and look for loose change.
+    private const string Downed = "Downed";
+
 
     //attacks
     private const string GroundAttack = "GroundAttack";
@@ -62,6 +69,8 @@ public class AnimatorManager : MonoBehaviour {
     //transition states
     private const string LedgeDropping = "LedgeDropping";
     private const string PlatformDropping = "PlatformDropping";
+    private const string Unconscious = "Unconscious";
+    private const string Recovering = "Recovering";
 
 	// Dictionary of states linked to their substates
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
@@ -75,24 +84,30 @@ public class AnimatorManager : MonoBehaviour {
         { State.REELING,        new string[] { Reeling, } },
         { State.MOSTLYDEAD,     new string[] { MostlyDead, } },
         { State.ALLDEAD,        new string[] { AllDead, } },
+        { State.DOWNED,         new string[] { Downed, } },
 
         //attacks
         { State.GROUNDATTACK,   new string[] { GroundAttack, } },
 
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
-        { State.LAG,            new string[] { Lag,} },
+        { State.LAG,            new string[] { Lag, } },
+        { State.UNCONSCIOUS,    new string[] { Unconscious, } },
+        { State.RECOVERING,     new string[] { Recovering, } },
+
 
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
         { State.GROUNDED,       new string[] { StageGrounded, PlatformGrounded, } },
         { State.ATTACKING,      new string[] { GroundAttack, } },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
+        { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
+        { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
 
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, } },
         { State.CANJUMP,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
-        { State.INVULNERABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, } },
+        { State.INVULNERABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, } },
 
     };
     private Animator theStateMachine;
