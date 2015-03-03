@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
 
                 if (!colliderOne.Equals(colliderTwo)) // make sure they aren't the same collider; cannot stop collisions between yourself
                 {
+                    Debug.Log(colliderOne.ToString() + colliderTwo.ToString());
                     Physics.IgnoreCollision(colliderOne, colliderTwo, true); // prevent physics collisions between the two players
                 }
             }

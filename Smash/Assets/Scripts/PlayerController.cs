@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
 	public float maxFallSpeed = 18f;			// max falling speed
 	public float maxDropSpeed = 26f;			// max forced drop speed
 
+    public float attackPriority = 0;
     public float neutralAttackDamage = 100.0f;  // damage for a neutral attack
 
 	public Text HUDText;
@@ -215,13 +216,28 @@ public class PlayerController : MonoBehaviour
     {
         PlayerController otherController = other.transform.parent.GetComponent<PlayerController>();
 
-        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK) && !otherController.InState(AnimatorManager.State.INVULNERABLE))
+        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK))
         {
-            didDamage = true;
-
-            other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
-            other.transform.parent.GetComponent <Animator>().SetTrigger(Triggers.ReelingEnter);
-            other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
+            if(otherController.InState(AnimatorManager.State.ATTACKING)) //both are attacking each other, do priority check to see if we do damage to them
+            {
+                if (otherController.attackPriority <= this.attackPriority) //their attack is weaker
+                {
+                    didDamage = true;
+                    attackPriority = -1;
+                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+                    other.transform.parent.GetComponent<Animator>().SetTrigger(Triggers.ReelingEnter);
+                    other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
+                }
+                //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
+            }
+            else if(!otherController.InState(AnimatorManager.State.INVULNERABLE)) //they aren't attacking; we're attacking them
+            {
+                didDamage = true;
+                attackPriority = -1;
+                other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+                other.transform.parent.GetComponent <Animator>().SetTrigger(Triggers.ReelingEnter);
+                other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
+            }
         }
     }
 
@@ -507,8 +523,9 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void startAttack()
+    public void startAttack(float attackPriority)
     {
         didDamage = false;
+        this.attackPriority = attackPriority;
     }
 }
