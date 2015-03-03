@@ -4,6 +4,7 @@ public class Acceleration
 {
 	// PRIVATE VARIABLES
 	private float magnitude;
+    public bool enabled = true;
 	private float? targetx;
 	private float? targety;
 	private float? targetz;
@@ -11,7 +12,7 @@ public class Acceleration
 	private float? originalTargetx;
 	private float? originalTargety;
 	private float? originalTargetz;
-
+    
 	// CONSTRUCTOR: null values in the targetVelocity will allow values to pass through when applied to a vector.
 	public Acceleration (float? targetx, float? targety, float? targetz, float magnitude)
 	{
@@ -27,7 +28,6 @@ public class Acceleration
 
 	// Get: magnitude
 	public float getMagnitude() { return magnitude; }
-
 	// Set: change values. null magnitude will keep it unchanged.
 	public void Set(float? newx, float? newy, float? newz, float? magnitude)
 	{
@@ -49,6 +49,8 @@ public class Acceleration
 	// ApplyToVector: return a vector with the acceleration applied to it.
 	public Vector3 ApplyToVector(Vector3 current)
 	{
+        if (!enabled)
+            return current;
 		float x = (targetx.HasValue)? targetx.Value : current.x;
 		float y = (targety.HasValue)? targety.Value : current.y;
 		float z = (targetz.HasValue)? targetz.Value : current.z;

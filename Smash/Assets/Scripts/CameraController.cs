@@ -4,14 +4,17 @@ using System.Collections;
 public class CameraController : MonoBehaviour {
 
 	public float smoothing = 10f;
-
+    public float sizeBuffer = 1f;
+    public float zScalar = -2.0f;
 	private GameObject[] players;
 	private Camera cam;
+    private Resolution resolution;
 
 	void Awake()
 	{
 		players = GameObject.FindGameObjectsWithTag(Tags.Player);
 		cam = GetComponent<Camera>();
+        resolution = Screen.currentResolution; // may need to do checking to check if resolution has been changed
 	}
 
 	void Update()
@@ -37,6 +40,18 @@ public class CameraController : MonoBehaviour {
 		float midx = (minx + maxx) * 0.5f;
 		float midy = (miny + maxy) * 0.5f;
 
-		cam.transform.position = Vector3.Lerp (cam.transform.position, new Vector3(midx, midy, cam.transform.position.z), smoothing * Time.deltaTime);
+        float xrange = Mathf.Abs(minx - maxx) + sizeBuffer;
+        float yrange = Mathf.Abs(miny - maxy) + sizeBuffer;
+        float z = cam.transform.position.z;
+        if (xrange / resolution.width > yrange / resolution.height)
+        {
+            z = xrange;
+        }
+        else
+        {
+            yrange = resolution.width * yrange / resolution.height;
+            z = yrange;
+        }
+        cam.transform.position = Vector3.Lerp(cam.transform.position, new Vector3(midx, midy, zScalar* z), smoothing * Time.deltaTime);
 	}
 }

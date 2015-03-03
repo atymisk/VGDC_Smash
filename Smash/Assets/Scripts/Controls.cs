@@ -6,18 +6,32 @@ public class Controls : MonoBehaviour {
 
 	// Command: enumeration of possible commands
 	public enum Command {
-		ATTACK,
-		SPECIAL,
-		JUMP,
+        ATTACK,
+        SPECIAL,
+        JUMP,
 		DUCK,
-		MOVE
+        MOVE,
 	};
+
+    private static Dictionary<Command, string> commandStrings = new Dictionary<Command, string>
+    { 
+        { Command.ATTACK, "InputAttack" },
+        { Command.SPECIAL, "InputSpecial" },
+        { Command.JUMP, "InputJump" },
+        { Command.DUCK, "InputDuck" },
+        { Command.MOVE, "InputMove" },
+    };
+    public static string CommandToString(Command com)
+    {
+        return commandStrings[com];
+    }
 
 	// PRIVATE VARIABLES
 	private Dictionary<Command, float> holdDict;			// tracks command hold duration
 	private Dictionary<Command, HashSet<KeyCode>> keyDict;	// stores association between commands and controller inputs
 	private Dictionary<Command, bool> startDict;			// track newly issued commands
 	private Dictionary<Command, bool> endDict;				// track newly ended commands
+    private Animator theStateMachine;
 	private float previousFacing;
 	private Vector2 stickInput;
 
@@ -30,7 +44,8 @@ public class Controls : MonoBehaviour {
 		endDict = new Dictionary<Command, bool>();
 		previousFacing = 0f;
 		stickInput = Vector2.zero;
-		InitializeKeyDict();
+        theStateMachine = GetComponent<Animator>();
+        InitializeKeyDict();
 		InitializeHoldDict();
 		InitializeStartDict();
 		InitializeEndDict();
@@ -55,14 +70,23 @@ public class Controls : MonoBehaviour {
 			}
 			if (!switchDir) {
 				if (GetCommand (com)) {			// if the command is being issued ...
-					if (holdDict[com] == 0f)
-						startDict[com] = true;			// flag start command
+                    if (holdDict[com] == 0f)
+                    {
+                        startDict[com] = true;			// flag start command
+                        theStateMachine.SetTrigger(CommandToString(com) + "Trigger");
+                    }
+                    endDict[com] = false;
 					holdDict[com] += Time.deltaTime;	// add to hold time
+                    theStateMachine.SetBool(CommandToString(com) + "Bool", true);
 				} else {						// Otherwise ...
-					if (holdDict[com] > 0f)
-						endDict[com] = true;			// flag end command
+                    if (holdDict[com] > 0f)
+                    {
+                        endDict[com] = true;			// flag end command
+                        theStateMachine.ResetTrigger(CommandToString(com) + "Trigger");
+                    }
 					startDict[com] = false;				// clear start command
 					holdDict[com] = 0f;					// reset hold time
+                    theStateMachine.SetBool(CommandToString(com) + "Bool", false);
 				}
 			}
 		}
@@ -86,7 +110,6 @@ public class Controls : MonoBehaviour {
 	public bool GetCommand(Command com) { return GetCommandMagnitude(com) != 0f; }
 	public bool GetCommandStart(Command com) { return startDict[com]; }
 	public bool GetCommandEnd(Command com) { return endDict[com]; }
-
 	// FLAG CONSUMERS
 	public bool ConsumeCommandStart(Command com)
 	{
