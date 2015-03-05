@@ -11,6 +11,8 @@ public class Controls : MonoBehaviour {
         JUMP,
 		DUCK,
         MOVE,
+        BLOCK,
+        DASH,
 	};
 
     private static Dictionary<Command, string> commandStrings = new Dictionary<Command, string>
@@ -20,6 +22,8 @@ public class Controls : MonoBehaviour {
         { Command.JUMP, "InputJump" },
         { Command.DUCK, "InputDuck" },
         { Command.MOVE, "InputMove" },
+        { Command.BLOCK, "InputBlock" },
+        { Command.DASH, "InputDash" },
     };
     public static string CommandToString(Command com)
     {
@@ -97,6 +101,8 @@ public class Controls : MonoBehaviour {
 	{
 		keyDict[Command.ATTACK] = new HashSet<KeyCode>{KeyCode.JoystickButton0, KeyCode.X, KeyCode.K};
 		keyDict[Command.SPECIAL] = new HashSet<KeyCode>{KeyCode.JoystickButton1, KeyCode.Y, KeyCode.L};
+        keyDict[Command.BLOCK] = new HashSet<KeyCode> { KeyCode.JoystickButton2, KeyCode.H }; // @TODO: map these to the correct joystick codes (bumpers+triggers)
+        keyDict[Command.DASH] = new HashSet<KeyCode> { KeyCode.JoystickButton3, KeyCode.J };
 		keyDict[Command.JUMP] = new HashSet<KeyCode>{KeyCode.Alpha0, KeyCode.JoystickButton2, KeyCode.JoystickButton3};
 		keyDict[Command.DUCK] = new HashSet<KeyCode>{KeyCode.Alpha1};
 		keyDict[Command.MOVE] = new HashSet<KeyCode>{KeyCode.Alpha2};

@@ -414,10 +414,8 @@ public class PlayerController : MonoBehaviour
 	{
         if (!theStateMachine.GetBool(Triggers.PlatformGrounded) && !InState(AnimatorManager.State.REELING)) //if we are not on a platform, because modifying platform colliders while that happens that causes problems
         {
-            Debug.Log("1");
             if (currVel.y > 0f && theStateMachine.GetBool(Triggers.MovingDown))
             {
-                Debug.Log("1");
                 theStateMachine.SetBool(Triggers.MovingDown, false);
                 SetPlatformCollision(false); //disable collisions so we can phase through
             }
