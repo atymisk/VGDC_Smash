@@ -163,11 +163,11 @@ public class PlayerController : MonoBehaviour
             case Tags.Platform :
                 StageCollideEnter();
                 PlatformCollideEnter(other);
-                theStateMachine.SetTrigger(Triggers.PlatformEnter);
+                theStateMachine.SetBool(Triggers.PlatformGrounded, true);
                 break;
 			case Tags.Stage :
 				StageCollideEnter();
-                theStateMachine.SetTrigger(Triggers.StageEnter);
+                theStateMachine.SetBool(Triggers.StageGrounded, true);
 				break;
 			case Tags.Boundary :
 				BoundaryCollideEnter();
@@ -189,11 +189,11 @@ public class PlayerController : MonoBehaviour
         case Tags.Platform : //non-platform-drop (normal) exiting
 			StageCollideExit();
             PlatformCollideExit();
-            theStateMachine.SetTrigger(Triggers.PlatformExit);
+            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
 			break;
 		case Tags.Stage :
 			StageCollideExit();
-            theStateMachine.SetTrigger(Triggers.StageExit);
+            theStateMachine.SetBool(Triggers.StageGrounded, false);
 			break;
 		case Tags.Boundary :
 			BoundaryCollideExit();
@@ -216,7 +216,7 @@ public class PlayerController : MonoBehaviour
     {
         PlayerController otherController = other.transform.parent.GetComponent<PlayerController>();
 
-        if (!didDamage && InState(AnimatorManager.State.GROUNDATTACK))
+        if (!didDamage && InState(AnimatorManager.State.ATTACKING))
         {
             if(otherController.InState(AnimatorManager.State.ATTACKING)) //both are attacking each other, do priority check to see if we do damage to them
             {
@@ -271,19 +271,13 @@ public class PlayerController : MonoBehaviour
         stateScript.Die();                          // kill the player
 	}
 	void BoundaryCollideExit(){}
-	void GrabEdgeCollideExit()
-    {
-        if (InState(AnimatorManager.State.LEDGEGRABBING) || InState(AnimatorManager.State.LEDGEDROPPING))
-            theStateMachine.SetTrigger(Triggers.LedgeGrabExit);
-        if (InState(AnimatorManager.State.LEDGEGRABBING))
-            EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
-    }
+	
     void GrabEdgeCollideEnter(Collider other)
     {
         if (InState(AnimatorManager.State.FALLING) && currVel.y < -8) //start a ledge grab
         {
             RemoveState(PlayerState.FALLING);   // reset states
-            theStateMachine.SetTrigger(Triggers.LedgeGrabEnter);
+            theStateMachine.SetBool(Triggers.LedgeGrab, true);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
             if (jumpCount > 1)
             {
@@ -297,6 +291,15 @@ public class PlayerController : MonoBehaviour
             SetTimerMax(TimerType.LEDGE_GRAB, LEDGE_GRAB_FRAMES);
         }
     }
+
+    void GrabEdgeCollideExit()
+    {
+        if (InState(AnimatorManager.State.LEDGEGRABBING) || InState(AnimatorManager.State.LEDGEDROPPING))
+            theStateMachine.SetBool(Triggers.LedgeGrab, false);
+        if (InState(AnimatorManager.State.LEDGEGRABBING))
+            EnableAccel(AccelType.FALL, true);      // basic cleanup stuff
+    }
+
 	void StopEdgeCollideEnter(){}
 	void StopEdgeCollideExit(){}
 
@@ -473,17 +476,13 @@ public class PlayerController : MonoBehaviour
     {
         if (InState(AnimatorManager.State.REELING))
         {
-            theStateMachine.ResetTrigger(Triggers.StageExit);
-            theStateMachine.ResetTrigger(Triggers.PlatformExit);
+            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
         }
         else if (InState(AnimatorManager.State.DEAD))
         {
-            theStateMachine.ResetTrigger(Triggers.StageExit);
-            theStateMachine.ResetTrigger(Triggers.StageEnter);
-            theStateMachine.ResetTrigger(Triggers.PlatformExit);
-            theStateMachine.ResetTrigger(Triggers.PlatformEnter);
-            theStateMachine.ResetTrigger(Triggers.LedgeGrabExit);
-            theStateMachine.ResetTrigger(Triggers.LedgeGrabEnter);
+            theStateMachine.SetBool(Triggers.StageGrounded, false);
+            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
+            theStateMachine.SetBool(Triggers.LedgeGrab, false);
         }
     }
 
