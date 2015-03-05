@@ -13,8 +13,7 @@ public class AnimatorManager : MonoBehaviour {
     public enum State
     {
         LEDGEGRABBING,
-        STAGEGROUNDED,
-        PLATFORMGROUNDED,
+        GROUNDED,
         RISING,
         FALLING,
         TUMBLING,
@@ -38,7 +37,6 @@ public class AnimatorManager : MonoBehaviour {
 
         //generalized states
         MIDAIR,
-        GROUNDED,
         ATTACKING,
         GROUNDATTACK,
         DEAD,
@@ -53,8 +51,7 @@ public class AnimatorManager : MonoBehaviour {
 
     // put the animator state string names here for autocomplete and stuff
     private const string LedgeGrabbing  = "LedgeGrabbing";
-    private const string StageGrounded  = "StageGrounded";
-    private const string PlatformGrounded = "PlatformGrounded";
+    private const string Grounded  = "Grounded";
     private const string Rising = "Rising";
     private const string Falling = "Falling";
     private const string Tumbling = "Tumbling";
@@ -86,8 +83,7 @@ public class AnimatorManager : MonoBehaviour {
     private static Dictionary<State, string[]> stateStrings = new Dictionary<State, string[]> //mapping the enum to the string names in the Animator
     { 
         { State.LEDGEGRABBING,  new string[] { LedgeGrabbing, } },
-        { State.STAGEGROUNDED,  new string[] { StageGrounded, } },
-        { State.PLATFORMGROUNDED, new string[] { PlatformGrounded, } },
+        { State.GROUNDED,       new string[] { Grounded, } },
         { State.RISING,         new string[] { Rising, } },
         { State.FALLING,        new string[] { Falling, } },
         { State.TUMBLING,       new string[] { Tumbling, } },
@@ -112,7 +108,6 @@ public class AnimatorManager : MonoBehaviour {
 
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
-        { State.GROUNDED,       new string[] { StageGrounded, PlatformGrounded, } },
         { State.ATTACKING,      new string[] { GroundNeutralAttack, GroundForwardTiltAttack, GroundDownTiltAttack, GroundUpTiltAttack, } },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
@@ -120,8 +115,8 @@ public class AnimatorManager : MonoBehaviour {
         { State.GROUNDATTACK,   new string[] { GroundNeutralAttack, GroundForwardTiltAttack, GroundDownTiltAttack, GroundUpTiltAttack, } },
 
         //possibility states
-        { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, } },
-        { State.CANJUMP,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
+        { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, } },
+        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
         { State.INVULNERABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, } },
 
     };

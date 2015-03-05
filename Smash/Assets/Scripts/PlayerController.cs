@@ -262,7 +262,7 @@ public class PlayerController : MonoBehaviour
 	
     void GrabEdgeCollideEnter(Collider other)
     {
-        if (InState(AnimatorManager.State.FALLING) && currVel.y < -8) //start a ledge grab
+        if (InState(AnimatorManager.State.FALLING) && currVel.y < -1) //start a ledge grab
         {
             theStateMachine.SetBool(Triggers.LedgeGrab, true);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
@@ -295,7 +295,7 @@ public class PlayerController : MonoBehaviour
 	bool CanJump () { return jumpCount < maxJumps && InState(AnimatorManager.State.CANJUMP); }
 	bool CanFall () { return InState(AnimatorManager.State.MIDAIR); }
     bool CanDrop() { return InState(AnimatorManager.State.MIDAIR); }
-    bool CanPlatformDrop() { return InState(AnimatorManager.State.PLATFORMGROUNDED) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
+    bool CanPlatformDrop() { return InState(AnimatorManager.State.GROUNDED) && theStateMachine.GetBool(Triggers.PlatformGrounded) && platform != null;  } // the not null check is not strictly necessary, since HasState should be accurate. Added a check here just in case
     bool CanLedgeDrop() { return InState(AnimatorManager.State.LEDGEGRABBING); }
 
 	// UTILITY FUNCTIONS
