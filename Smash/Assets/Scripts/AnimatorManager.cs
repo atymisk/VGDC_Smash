@@ -24,6 +24,7 @@ public class AnimatorManager : MonoBehaviour {
         LANDING,
         BLOCKING,
         GROUNDDASHING,
+        AIRDASHING,
 
         GROUNDNEUTRALATTACK,
         GROUNDFORWARDTILTATTACK,
@@ -32,7 +33,6 @@ public class AnimatorManager : MonoBehaviour {
 
         //transition states
         LEDGEDROPPING,
-        PLATFORMDROPPING,
         LAG,
         UNCONSCIOUS,
         RECOVERING,
@@ -61,6 +61,7 @@ public class AnimatorManager : MonoBehaviour {
     private const string Landing = "Landing";
     private const string Blocking = "Blocking";
     private const string GroundDashing = "GroundDashing";
+    private const string AirDashing = "AirDashing";
 
     private const string MostlyDead = "MostlyDead";
     private const string AllDead = "AllDead";
@@ -79,7 +80,6 @@ public class AnimatorManager : MonoBehaviour {
 
     //transition states
     private const string LedgeDropping = "LedgeDropping";
-    private const string PlatformDropping = "PlatformDropping";
     private const string Unconscious = "Unconscious";
     private const string Recovering = "Recovering";
 
@@ -98,6 +98,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.LANDING,        new string[] { Landing, } },
         { State.BLOCKING,       new string[] { Blocking, } },
         { State.GROUNDDASHING,  new string[] { GroundDashing, } },
+        { State.AIRDASHING,     new string[] { AirDashing, } },
 
         //attacks
         { State.GROUNDNEUTRALATTACK,   new string[] { NeutralAttack, } },
@@ -113,16 +114,16 @@ public class AnimatorManager : MonoBehaviour {
 
 
         //generalized states
-        { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
+        { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, Tumbling, Reeling, } },
         { State.ATTACKING,      new string[] { NeutralAttack, ForwardTiltAttack, DownTiltAttack, UpTiltAttack, } },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
-        { State.DASHING,        new string[] { GroundDashing, } },
+        { State.DASHING,        new string[] { GroundDashing, AirDashing, } },
 
         //possibility states
-        { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, } },
-        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing, } },
+        { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, AirDashing, } },
+        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, LedgeGrabbing, } },
         { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, GroundDashing, } },
 
     };

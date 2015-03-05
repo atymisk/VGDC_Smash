@@ -400,6 +400,8 @@ public class PlayerController : MonoBehaviour
 
         if (InState(AnimatorManager.State.GROUNDED) && controls.GetCommand(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
             SetVelocity(maxRunSpeed * sign, 0f, null);
+        if (InState(AnimatorManager.State.MIDAIR) && controls.GetCommand(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start an air dash
+            SetVelocity(midairSpeed * sign, null, null);
 	}
 	void DoJump()
 	{
