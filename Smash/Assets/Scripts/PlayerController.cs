@@ -5,13 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-	private enum PlayerState
-	{
-		FALLING,
-        PLATFORMGROUNDED,
-        RISING,
-	};
-
 	public enum AccelType
 	{
 		FALL,
@@ -57,7 +50,6 @@ public class PlayerController : MonoBehaviour
 	public Text HUDText;
 
     private Animator theStateMachine;
-	private HashSet<PlayerState> states;						// collection of the states the player is in
 	private Dictionary<AccelType, Acceleration> accelerations;	// collection of accelerations ocurring on this player
 	private Dictionary<TimerType, int> timers;				// collection of timers for recovery delays, smash charges, etc.
 	private Dictionary<TimerType, int> timerMaxes;			// collection of timer maximum values
@@ -77,9 +69,6 @@ public class PlayerController : MonoBehaviour
 	// INITIALIZE
 	void Awake ()
 	{
-		// Initialize states. start in midair.
-		states = new HashSet<PlayerState> {PlayerState.FALLING};
-
 		// Get reference to control script
 		// @TODO: move this outside of player game object and into a MatchManager or something
 		controls = GetComponent<Controls>();
@@ -243,8 +232,6 @@ public class PlayerController : MonoBehaviour
 
 	void StageCollideEnter() // general stuff for entering a stage
 	{
-		RemoveState(PlayerState.FALLING);			// player is no longer falling
-        RemoveState(PlayerState.RISING);            // player is no longer rising
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         ResetAccel(AccelType.MOVE);
@@ -259,12 +246,10 @@ public class PlayerController : MonoBehaviour
     void PlatformCollideEnter(Collider other) // stuff only specific to entering a platform
     {
         platform = other.transform.parent; // update the reference to the platform's collider
-        AddState(PlayerState.PLATFORMGROUNDED);
     }
 
     void PlatformCollideExit()
     {
-        RemoveState(PlayerState.PLATFORMGROUNDED);
     }
 
 	void BoundaryCollideEnter()
@@ -277,7 +262,6 @@ public class PlayerController : MonoBehaviour
     {
         if (InState(AnimatorManager.State.FALLING) && currVel.y < -8) //start a ledge grab
         {
-            RemoveState(PlayerState.FALLING);   // reset states
             theStateMachine.SetBool(Triggers.LedgeGrab, true);
             transform.position = other.transform.position;	// move to grabbing position // TODO : use something that would make a smooth animation, not just this teleport
             if (jumpCount > 1)
@@ -319,9 +303,6 @@ public class PlayerController : MonoBehaviour
 	void SetAccel(AccelType accel, float? x, float? y, float? z, float mag) { accelerations[accel].Set(x, y, z, mag); }
 	void ResetAccel(AccelType accel) { accelerations[accel].Reset(); }
     void EnableAccel(AccelType accel, bool enabled) { accelerations[accel].enabled = enabled; }
-	void RemoveState(PlayerState state) { states.Remove(state); }
-	void AddState(PlayerState state) { states.Add(state); }
-	bool HasState(PlayerState state) { return states.Contains(state); }
     public bool InState(AnimatorManager.State state) { return animatorManager.InState(state); }
 	bool ChangedDirectionHorizontal(){ return currVel.x < 0f && prevVel.x * currVel.x <= 0f; }
 
@@ -336,7 +317,7 @@ public class PlayerController : MonoBehaviour
 	{
 		currVel.x = (transform.position.x - prevPos.x) / Time.fixedDeltaTime;
 		currVel.y = (transform.position.y - prevPos.y) / Time.fixedDeltaTime;
-        theStateMachine.SetBool(Triggers.MovingDown, currVel.y < 0);
+        //theStateMachine.SetBool(Triggers.MovingDown, currVel.y < 0); //moved to DoFall to remove the old state machine
 	}
     void UpdateTimer(TimerType timer)
 	{
@@ -418,21 +399,19 @@ public class PlayerController : MonoBehaviour
     }
 	void DoFall()
 	{
-        if (!HasState(PlayerState.PLATFORMGROUNDED) && (InState(AnimatorManager.State.MIDAIR) || InState(AnimatorManager.State.GROUNDED)))
+        if (!theStateMachine.GetBool(Triggers.PlatformGrounded)) //if we are not on a platform, because modifying platform colliders while that happens that causes problems
         {
             // the below returns true when we have STARTED to fall
-            if (currVel.y < 0f && !HasState(PlayerState.FALLING))
+            if (currVel.y < 0f && !theStateMachine.GetBool(Triggers.MovingDown))
             {
-                AddState(PlayerState.FALLING);
-                RemoveState(PlayerState.RISING);
+                theStateMachine.SetBool(Triggers.MovingDown, true);
                 SetPlatformCollision(true); //enable collisions so we don't phase through
             }
 
             //check to see if we're rising; only returns true when we've entered the rising state
-            else if (currVel.y > 0f && !HasState(PlayerState.RISING))
+            else if (currVel.y > 0f && theStateMachine.GetBool(Triggers.MovingDown))
             {
-                RemoveState(PlayerState.FALLING);
-                AddState(PlayerState.RISING);
+                theStateMachine.SetBool(Triggers.MovingDown, false);
                 SetPlatformCollision(false); //disable collisions so we can phase through
             }
         }
@@ -454,7 +433,6 @@ public class PlayerController : MonoBehaviour
     {
         if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //normal platforms
         {
-            AddState(PlayerState.FALLING);
             //platform dropping code
 
             StageCollideExit(); // collision will be disabled with the platform, so must call these here
@@ -467,7 +445,6 @@ public class PlayerController : MonoBehaviour
         }
         if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
-            AddState(PlayerState.FALLING);
             EnableAccel(AccelType.FALL, true);
             jumpCount = 0; // can't use ledge grabs to get more jumps
         }
@@ -478,12 +455,6 @@ public class PlayerController : MonoBehaviour
         if (InState(AnimatorManager.State.REELING))
         {
             theStateMachine.SetBool(Triggers.PlatformGrounded, false);
-        }
-        else if (InState(AnimatorManager.State.DEAD))
-        {
-            theStateMachine.SetBool(Triggers.StageGrounded, false);
-            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
-            theStateMachine.SetBool(Triggers.LedgeGrab, false);
         }
     }
 
@@ -502,10 +473,11 @@ public class PlayerController : MonoBehaviour
         jumpCount = 0;								// reset jump count
         ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
-        RemoveState(PlayerState.FALLING);           // reset all other previous states
-        RemoveState(PlayerState.RISING);            
-        RemoveState(PlayerState.PLATFORMGROUNDED);
-        
+
+        theStateMachine.SetBool(Triggers.StageGrounded, false);
+        theStateMachine.SetBool(Triggers.PlatformGrounded, false);
+        theStateMachine.SetBool(Triggers.LedgeGrab, false);
+
         theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
     }
