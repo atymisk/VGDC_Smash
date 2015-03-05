@@ -213,8 +213,9 @@ public class PlayerController : MonoBehaviour
                 {
                     didDamage = true;
                     attackPriority = -1;
-                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
                     other.transform.parent.GetComponent<Animator>().SetTrigger(Triggers.ReelingEnter);
+                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+                    
                     other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
                 }
                 //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
@@ -223,8 +224,9 @@ public class PlayerController : MonoBehaviour
             {
                 didDamage = true;
                 attackPriority = -1;
+                other.transform.parent.GetComponent<Animator>().SetTrigger(Triggers.ReelingEnter);
                 other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
-                other.transform.parent.GetComponent <Animator>().SetTrigger(Triggers.ReelingEnter);
+                
                 other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
             }
         }
@@ -479,6 +481,7 @@ public class PlayerController : MonoBehaviour
         theStateMachine.SetBool(Triggers.StageGrounded, false);
         theStateMachine.SetBool(Triggers.PlatformGrounded, false);
         theStateMachine.SetBool(Triggers.LedgeGrab, false);
+        theStateMachine.ResetTrigger(Triggers.ReelingEnter);
 
         theStateMachine.SetTrigger(Triggers.Death);
         SetPlatformCollision(true);                 // reset platform collision
