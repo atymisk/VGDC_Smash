@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
 	public float maxDropSpeed = 26f;			// max forced drop speed
 
     public float attackPriority = 0;
-    public float neutralAttackDamage = 100.0f;  // damage for a neutral attack
+    
 
     public float maxShieldHealth = 150.0f;
     public float shieldRegen = 1.0f;
@@ -71,6 +71,7 @@ public class PlayerController : MonoBehaviour
     private bool didDamage = false;
 
     private float shieldHealth;
+    private float attackDamage = 100.0f;  // damage for a neutral attack
 
 	// INITIALIZE
 	void Awake ()
@@ -226,27 +227,34 @@ public class PlayerController : MonoBehaviour
                     Animator otherAnimator = other.transform.parent.GetComponent<Animator>();
                     otherAnimator.SetTrigger(Triggers.ReelingEnter);
 
-                    theStateMachine.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
-                    theStateMachine.SetBool(Triggers.StageGrounded, false);
+                    otherAnimator.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
+                    otherAnimator.SetBool(Triggers.StageGrounded, false);
 
-                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
+                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(attackDamage, transform.position);
                     
                     other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
                 }
                 //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
             }
-            else if(!otherController.InState(AnimatorManager.State.UNTOUCHABLE)) //they aren't attacking; we're attacking them
+            else if (otherController.InState(AnimatorManager.State.BLOCKING)) //our attack is blocked
+            {
+                didDamage = true;
+                attackPriority = -1;
+
+                otherController.TakeBlockHit(attackDamage);
+            }
+            else if (!otherController.InState(AnimatorManager.State.UNTOUCHABLE)) //they aren't attacking; we're attacking them
             {
                 didDamage = true;
                 attackPriority = -1;
                 Animator otherAnimator = other.transform.parent.GetComponent<Animator>();
                 otherAnimator.SetTrigger(Triggers.ReelingEnter);
 
-                theStateMachine.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
-                theStateMachine.SetBool(Triggers.StageGrounded, false);
+                otherAnimator.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
+                otherAnimator.SetBool(Triggers.StageGrounded, false);
 
-                other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
-                
+                other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(attackDamage, transform.position);
+
                 other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
             }
         }
@@ -518,9 +526,20 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void startAttack(float attackPriority)
+    public void SetAttackPriority(float attackPriority)
     {
         didDamage = false;
         this.attackPriority = attackPriority;
+    }
+
+    public void SetAttackDamage(float attackDamage)
+    {
+        this.attackDamage = attackDamage;
+    }
+
+    public void TakeBlockHit(float damage)
+    {
+        shieldHealth = shieldHealth - damage;
+        //todo : then stun the player
     }
 }
