@@ -248,7 +248,8 @@ public class PlayerController : MonoBehaviour
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
         ResetAccel(AccelType.MOVE);
-        SetVelocity(0f, 0f, 0f);
+        if(InState(AnimatorManager.State.AIRINCAPACITATED) || InState(AnimatorManager.State.FALLING)) //use landing animation with stop
+            SetVelocity(0f, 0f, 0f);
 	}
     
 	void StageCollideExit()
@@ -335,7 +336,7 @@ public class PlayerController : MonoBehaviour
 	{
 		currVel.x = (transform.position.x - prevPos.x) / Time.fixedDeltaTime;
 		currVel.y = (transform.position.y - prevPos.y) / Time.fixedDeltaTime;
-        theStateMachine.SetFloat("currVel.y", currVel.y);
+        theStateMachine.SetBool(Triggers.MovingDown, currVel.y < 0);
 	}
     void UpdateTimer(TimerType timer)
 	{

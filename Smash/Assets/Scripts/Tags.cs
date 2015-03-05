@@ -18,4 +18,5 @@ public class Triggers : MonoBehaviour
     public const string PlatformGrounded = "PlatformGrounded";
     public const string Death = "Death";
     public const string ReelingEnter = "ReelingEnter";
+    public const string MovingDown = "MovingDown";
 }
