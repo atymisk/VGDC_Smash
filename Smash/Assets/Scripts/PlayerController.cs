@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
         DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
-        DoTriggerClear();
+
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
 			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
@@ -178,7 +178,8 @@ public class PlayerController : MonoBehaviour
         case Tags.Platform : //non-platform-drop (normal) exiting
 			StageCollideExit();
             PlatformCollideExit();
-            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
+            if(!InState(AnimatorManager.State.REELING))
+                theStateMachine.SetBool(Triggers.PlatformGrounded, false);
 			break;
 		case Tags.Stage :
 			StageCollideExit();
@@ -213,7 +214,12 @@ public class PlayerController : MonoBehaviour
                 {
                     didDamage = true;
                     attackPriority = -1;
-                    other.transform.parent.GetComponent<Animator>().SetTrigger(Triggers.ReelingEnter);
+                    Animator otherAnimator = other.transform.parent.GetComponent<Animator>();
+                    otherAnimator.SetTrigger(Triggers.ReelingEnter);
+
+                    theStateMachine.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
+                    theStateMachine.SetBool(Triggers.StageGrounded, false);
+
                     other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
                     
                     other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
@@ -224,7 +230,12 @@ public class PlayerController : MonoBehaviour
             {
                 didDamage = true;
                 attackPriority = -1;
-                other.transform.parent.GetComponent<Animator>().SetTrigger(Triggers.ReelingEnter);
+                Animator otherAnimator = other.transform.parent.GetComponent<Animator>();
+                otherAnimator.SetTrigger(Triggers.ReelingEnter);
+
+                theStateMachine.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
+                theStateMachine.SetBool(Triggers.StageGrounded, false);
+
                 other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(neutralAttackDamage, transform.position);
                 
                 other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
@@ -401,21 +412,20 @@ public class PlayerController : MonoBehaviour
     }
 	void DoFall()
 	{
-        if (!theStateMachine.GetBool(Triggers.PlatformGrounded)) //if we are not on a platform, because modifying platform colliders while that happens that causes problems
+        if (!theStateMachine.GetBool(Triggers.PlatformGrounded) && !InState(AnimatorManager.State.REELING)) //if we are not on a platform, because modifying platform colliders while that happens that causes problems
         {
-            // the below returns true when we have STARTED to fall
-            if (currVel.y < 0f && !theStateMachine.GetBool(Triggers.MovingDown))
+            Debug.Log("1");
+            if (currVel.y > 0f && theStateMachine.GetBool(Triggers.MovingDown))
             {
-                theStateMachine.SetBool(Triggers.MovingDown, true);
-                SetPlatformCollision(true); //enable collisions so we don't phase through
-            }
-
-            //check to see if we're rising; only returns true when we've entered the rising state
-            else if (currVel.y > 0f && theStateMachine.GetBool(Triggers.MovingDown))
-            {
+                Debug.Log("1");
                 theStateMachine.SetBool(Triggers.MovingDown, false);
                 SetPlatformCollision(false); //disable collisions so we can phase through
             }
+        }
+        if (currVel.y < 0f && !theStateMachine.GetBool(Triggers.MovingDown))
+        {
+            theStateMachine.SetBool(Triggers.MovingDown, true);
+            SetPlatformCollision(true); //enable collisions so we don't phase through
         }
 		if (CanFall()) {
             
@@ -451,14 +461,6 @@ public class PlayerController : MonoBehaviour
         {
             EnableAccel(AccelType.FALL, true);
             jumpCount = 0; // can't use ledge grabs to get more jumps
-        }
-    }
-
-    void DoTriggerClear()
-    {
-        if (InState(AnimatorManager.State.REELING))
-        {
-            theStateMachine.SetBool(Triggers.PlatformGrounded, false);
         }
     }
 
