@@ -47,6 +47,10 @@ public class PlayerController : MonoBehaviour
     public float attackPriority = 0;
     public float neutralAttackDamage = 100.0f;  // damage for a neutral attack
 
+    public float maxShieldHealth = 150.0f;
+    public float shieldRegen = 1.0f;
+    public float shieldDegen = 3.0f;
+
 	public Text HUDText;
 
     private Animator theStateMachine;
@@ -65,6 +69,8 @@ public class PlayerController : MonoBehaviour
     private List<Collider> platformColliders; // reference to every platform collider, so that they can be disabled when jumping up
 
     private bool didDamage = false;
+
+    private float shieldHealth;
 
 	// INITIALIZE
 	void Awake ()
@@ -95,6 +101,9 @@ public class PlayerController : MonoBehaviour
         
         // Player starts midair, so allow one air jump
 		jumpCount = 1;
+
+        // Player starts at full, so shields are at full
+        shieldHealth = maxShieldHealth;
 
 		// Set previous player position and velocity
 		currVel = Vector2.zero;
@@ -226,7 +235,7 @@ public class PlayerController : MonoBehaviour
                 }
                 //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
             }
-            else if(!otherController.InState(AnimatorManager.State.INVULNERABLE)) //they aren't attacking; we're attacking them
+            else if(!otherController.InState(AnimatorManager.State.UNTOUCHABLE)) //they aren't attacking; we're attacking them
             {
                 didDamage = true;
                 attackPriority = -1;
@@ -331,6 +340,17 @@ public class PlayerController : MonoBehaviour
 		currVel.x = (transform.position.x - prevPos.x) / Time.fixedDeltaTime;
 		currVel.y = (transform.position.y - prevPos.y) / Time.fixedDeltaTime;
         //theStateMachine.SetBool(Triggers.MovingDown, currVel.y < 0); //moved to DoFall to remove the old state machine
+        if (InState(AnimatorManager.State.BLOCKING))
+        {
+            shieldHealth = shieldHealth - shieldDegen;
+        }
+        else if (shieldHealth < maxShieldHealth)
+        {
+            shieldHealth += shieldRegen;
+            if (shieldHealth > maxShieldHealth)
+                shieldHealth = maxShieldHealth;
+        }
+        theStateMachine.SetFloat(Triggers.ShieldHealth, shieldHealth);
 	}
     void UpdateTimer(TimerType timer)
 	{
@@ -476,7 +496,8 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(0, 10, 0);	// reset player position
         jumpCount = 0;								// reset jump count
         ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        SetVelocity(0f, 0f, 0f);                    //reset velocity and velocity tracker
+        SetVelocity(0f, 0f, 0f);                    // reset velocity and velocity tracker
+        shieldHealth = maxShieldHealth;             // shields to full
 
         theStateMachine.SetBool(Triggers.StageGrounded, false);
         theStateMachine.SetBool(Triggers.PlatformGrounded, false);

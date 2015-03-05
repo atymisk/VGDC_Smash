@@ -22,6 +22,7 @@ public class AnimatorManager : MonoBehaviour {
         ALLDEAD,
         DOWNED,
         LANDING,
+        BLOCKING,
 
         GROUNDNEUTRALATTACK,
         GROUNDFORWARDTILTATTACK,
@@ -45,7 +46,7 @@ public class AnimatorManager : MonoBehaviour {
         //possibility states
         CANMOVE,
         CANJUMP,
-        INVULNERABLE,
+        UNTOUCHABLE,
     }
 
     // put the animator state string names here for autocomplete and stuff
@@ -56,6 +57,7 @@ public class AnimatorManager : MonoBehaviour {
     private const string Tumbling = "Tumbling";
     private const string Reeling = "Reeling";
     private const string Landing = "Landing";
+    private const string Blocking = "Blocking";
 
     private const string MostlyDead = "MostlyDead";
     private const string AllDead = "AllDead";
@@ -91,6 +93,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.ALLDEAD,        new string[] { AllDead, } },
         { State.DOWNED,         new string[] { Downed, } },
         { State.LANDING,        new string[] { Landing, } },
+        { State.BLOCKING,       new string[] { Blocking, } },
 
         //attacks
         { State.GROUNDNEUTRALATTACK,   new string[] { NeutralAttack, } },
@@ -115,7 +118,7 @@ public class AnimatorManager : MonoBehaviour {
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, } },
         { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
-        { State.INVULNERABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, } },
+        { State.UNTOUCHABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, } },
 
     };
     private Animator theStateMachine;
