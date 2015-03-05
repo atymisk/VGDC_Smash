@@ -24,6 +24,8 @@ public class AnimatorManager : MonoBehaviour {
         DOWNED,
         LANDING,
 
+        GROUNDNEUTRALATTACK,
+
         //transition states
         LEDGEDROPPING,
         PLATFORMDROPPING,
@@ -34,8 +36,8 @@ public class AnimatorManager : MonoBehaviour {
         //generalized states
         MIDAIR,
         GROUNDED,
-        GROUNDATTACK,
         ATTACKING,
+        GROUNDATTACK,
         DEAD,
         GROUNDINCAPACITATED,
         AIRINCAPACITATED,
@@ -65,7 +67,7 @@ public class AnimatorManager : MonoBehaviour {
 
 
     //attacks
-    private const string GroundAttack = "GroundAttack";
+    private const string GroundNeutralAttack = "GroundNeutralAttack";
     private const string Lag = "Lag";
 
     //transition states
@@ -90,7 +92,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.LANDING,        new string[] { Landing, } },
 
         //attacks
-        { State.GROUNDATTACK,   new string[] { GroundAttack, } },
+        { State.GROUNDNEUTRALATTACK,   new string[] { GroundNeutralAttack, } },
 
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
@@ -102,10 +104,11 @@ public class AnimatorManager : MonoBehaviour {
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
         { State.GROUNDED,       new string[] { StageGrounded, PlatformGrounded, } },
-        { State.ATTACKING,      new string[] { GroundAttack, } },   
+        { State.ATTACKING,      new string[] { GroundNeutralAttack, } },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
+        { State.GROUNDATTACK,   new string[] { GroundNeutralAttack, } },
 
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, } },

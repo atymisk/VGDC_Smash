@@ -19,6 +19,10 @@ public class Triggers : MonoBehaviour
     public const string StageExit = "StageExit";
     public const string PlatformEnter = "PlatformEnter";
     public const string PlatformExit = "PlatformExit";
+
+    public const string LedgeGrab = "LedgeGrab";
+    public const string StageGrounded = "StageGrounded";
+    public const string PlatformGrounded = "PlatformGrounded";
     public const string Death = "Death";
     public const string ReelingEnter = "ReelingEnter";
 }
