@@ -115,6 +115,7 @@ public class Controls : MonoBehaviour {
 	{
 		bool result = startDict[com];
 		startDict[com] = false;
+        theStateMachine.ResetTrigger(CommandToString(com) + "Trigger");
 		return result;
 	}
 	public bool ConsumeCommandEnd(Command com)

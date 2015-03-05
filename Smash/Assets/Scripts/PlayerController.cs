@@ -422,7 +422,9 @@ public class PlayerController : MonoBehaviour
     void DoDrop()
     {
         if (CanDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
-			SetAccel(AccelType.FALL, null, maxDropSpeed * -1f, null, dropAccel);
+        {
+            SetAccel(AccelType.FALL, null, maxDropSpeed * -1f, null, dropAccel);
+        }
 	}
 	void DoSmash ()
 	{

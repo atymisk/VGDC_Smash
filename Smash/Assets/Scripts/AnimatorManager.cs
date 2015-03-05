@@ -25,6 +25,9 @@ public class AnimatorManager : MonoBehaviour {
         LANDING,
 
         GROUNDNEUTRALATTACK,
+        GROUNDFORWARDTILTATTACK,
+        GROUNDDOWNTILTATTACK,
+        GROUNDUPTILTATTACK,
 
         //transition states
         LEDGEDROPPING,
@@ -68,6 +71,9 @@ public class AnimatorManager : MonoBehaviour {
 
     //attacks
     private const string GroundNeutralAttack = "GroundNeutralAttack";
+    private const string GroundForwardTiltAttack = "GroundForwardTiltAttack";
+    private const string GroundDownTiltAttack = "GroundDownTiltAttack";
+    private const string GroundUpTiltAttack = "GroundUpTiltAttack";
     private const string Lag = "Lag";
 
     //transition states
@@ -93,6 +99,9 @@ public class AnimatorManager : MonoBehaviour {
 
         //attacks
         { State.GROUNDNEUTRALATTACK,   new string[] { GroundNeutralAttack, } },
+        { State.GROUNDFORWARDTILTATTACK, new string[] { GroundForwardTiltAttack, } },
+        { State.GROUNDDOWNTILTATTACK, new string[] { GroundDownTiltAttack, } },
+        { State.GROUNDUPTILTATTACK, new string[] { GroundUpTiltAttack, } },
 
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
@@ -104,11 +113,11 @@ public class AnimatorManager : MonoBehaviour {
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, PlatformDropping, Tumbling, Reeling, } },
         { State.GROUNDED,       new string[] { StageGrounded, PlatformGrounded, } },
-        { State.ATTACKING,      new string[] { GroundNeutralAttack, } },   
+        { State.ATTACKING,      new string[] { GroundNeutralAttack, GroundForwardTiltAttack, GroundDownTiltAttack, GroundUpTiltAttack, } },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
-        { State.GROUNDATTACK,   new string[] { GroundNeutralAttack, } },
+        { State.GROUNDATTACK,   new string[] { GroundNeutralAttack, GroundForwardTiltAttack, GroundDownTiltAttack, GroundUpTiltAttack, } },
 
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, StageGrounded, PlatformGrounded, Tumbling, } },
