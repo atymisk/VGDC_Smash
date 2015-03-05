@@ -22,6 +22,7 @@ public class AnimatorManager : MonoBehaviour {
         MOSTLYDEAD,
         ALLDEAD,
         DOWNED,
+        LANDING,
 
         //transition states
         LEDGEDROPPING,
@@ -53,6 +54,7 @@ public class AnimatorManager : MonoBehaviour {
     private const string Falling = "Falling";
     private const string Tumbling = "Tumbling";
     private const string Reeling = "Reeling";
+    private const string Landing = "Landing";
 
     private const string MostlyDead = "MostlyDead";
     private const string AllDead = "AllDead";

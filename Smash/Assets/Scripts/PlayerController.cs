@@ -247,11 +247,8 @@ public class PlayerController : MonoBehaviour
         RemoveState(PlayerState.RISING);            // player is no longer rising
 		jumpCount = 0;								// reset number of jumps player has made
 		ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        if (InState(AnimatorManager.State.AIRINCAPACITATED)) // going to go into ground incapacitated
-        {
-            ResetAccel(AccelType.MOVE);
-            SetVelocity(0f, 0f, 0f);
-        }
+        ResetAccel(AccelType.MOVE);
+        SetVelocity(0f, 0f, 0f);
 	}
     
 	void StageCollideExit()
