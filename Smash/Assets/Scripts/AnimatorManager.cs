@@ -124,7 +124,7 @@ public class AnimatorManager : MonoBehaviour {
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, AirDashing, } },
         { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, LedgeGrabbing, } },
-        { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, GroundDashing, } },
+        { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, GroundDashing, AirDashing, } },
 
     };
     private Animator theStateMachine;
