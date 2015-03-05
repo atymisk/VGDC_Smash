@@ -23,6 +23,7 @@ public class AnimatorManager : MonoBehaviour {
         DOWNED,
         LANDING,
         BLOCKING,
+        GROUNDDASHING,
 
         GROUNDNEUTRALATTACK,
         GROUNDFORWARDTILTATTACK,
@@ -42,6 +43,7 @@ public class AnimatorManager : MonoBehaviour {
         DEAD,
         GROUNDINCAPACITATED,
         AIRINCAPACITATED,
+        DASHING,
 
         //possibility states
         CANMOVE,
@@ -58,6 +60,7 @@ public class AnimatorManager : MonoBehaviour {
     private const string Reeling = "Reeling";
     private const string Landing = "Landing";
     private const string Blocking = "Blocking";
+    private const string GroundDashing = "GroundDashing";
 
     private const string MostlyDead = "MostlyDead";
     private const string AllDead = "AllDead";
@@ -94,6 +97,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.DOWNED,         new string[] { Downed, } },
         { State.LANDING,        new string[] { Landing, } },
         { State.BLOCKING,       new string[] { Blocking, } },
+        { State.GROUNDDASHING,  new string[] { GroundDashing, } },
 
         //attacks
         { State.GROUNDNEUTRALATTACK,   new string[] { NeutralAttack, } },
@@ -114,11 +118,12 @@ public class AnimatorManager : MonoBehaviour {
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
+        { State.DASHING,        new string[] { GroundDashing, } },
 
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, } },
-        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing,} },
-        { State.UNTOUCHABLE,   new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, } },
+        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, PlatformDropping, LedgeGrabbing, } },
+        { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, GroundDashing, } },
 
     };
     private Animator theStateMachine;

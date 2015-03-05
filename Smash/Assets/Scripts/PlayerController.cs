@@ -397,6 +397,9 @@ public class PlayerController : MonoBehaviour
 				SetAccel(AccelType.MOVE, 0f, null, null, groundDrag);	// on ground apply ground drag
 			}
 		}
+
+        if (InState(AnimatorManager.State.GROUNDED) && controls.GetCommand(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
+            SetVelocity(maxRunSpeed * sign, 0f, null);
 	}
 	void DoJump()
 	{
