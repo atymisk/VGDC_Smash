@@ -87,6 +87,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.MOSTLYDEAD,     new string[] { MostlyDead, } },
         { State.ALLDEAD,        new string[] { AllDead, } },
         { State.DOWNED,         new string[] { Downed, } },
+        { State.LANDING,        new string[] { Landing, } },
 
         //attacks
         { State.GROUNDATTACK,   new string[] { GroundAttack, } },
