@@ -235,7 +235,7 @@ public class PlayerController : MonoBehaviour
 
                 other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(attackDamage, transform.position);
 
-                other.transform.parent.GetComponent<AnimatorManager>().startTimer(15);
+                other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
                 //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
 
                 if(otherController.InState(AnimatorManager.State.STUNNED))
