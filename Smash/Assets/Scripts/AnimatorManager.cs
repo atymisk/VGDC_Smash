@@ -27,10 +27,15 @@ public class AnimatorManager : MonoBehaviour {
         GROUNDDASHING,
         AIRDASHING,
 
-        GROUNDNEUTRALATTACK,
-        GROUNDFORWARDTILTATTACK,
-        GROUNDDOWNTILTATTACK,
-        GROUNDUPTILTATTACK,
+        NEUTRALATTACK,
+        FORWARDTILTATTACK,
+        DOWNTILTATTACK,
+        UPTILTATTACK,
+
+        NEUTRALSMASH,
+        FORWARDSMASH,
+        DOWNSMASH,
+        UPSMASH,
 
         //transition states
         LEDGEDROPPING,
@@ -79,6 +84,10 @@ public class AnimatorManager : MonoBehaviour {
     private const string DownTiltAttack = "DownTiltAttack";
     private const string UpTiltAttack = "UpTiltAttack";
     private const string Lag = "Lag";
+    private const string NeutralSmash = "NeutralSmash";
+    private const string ForwardSmash = "ForwardSmash";
+    private const string DownSmash = "DownSmash";
+    private const string UpSmash = "UpSmash";
 
     //transition states
     private const string LedgeDropping = "LedgeDropping";
@@ -104,10 +113,15 @@ public class AnimatorManager : MonoBehaviour {
         { State.AIRDASHING,     new string[] { AirDashing, } },
 
         //attacks
-        { State.GROUNDNEUTRALATTACK,   new string[] { NeutralAttack, } },
-        { State.GROUNDFORWARDTILTATTACK, new string[] { ForwardTiltAttack, } },
-        { State.GROUNDDOWNTILTATTACK, new string[] { DownTiltAttack, } },
-        { State.GROUNDUPTILTATTACK, new string[] { UpTiltAttack, } },
+        { State.NEUTRALATTACK,   new string[] { NeutralAttack, } },
+        { State.FORWARDTILTATTACK, new string[] { ForwardTiltAttack, } },
+        { State.DOWNTILTATTACK, new string[] { DownTiltAttack, } },
+        { State.UPTILTATTACK, new string[] { UpTiltAttack, } },
+
+        { State.NEUTRALSMASH,   new string[] { NeutralSmash, } },
+        { State.FORWARDSMASH,   new string[] { ForwardSmash, } },
+        { State.DOWNSMASH,      new string[] { DownSmash, } },
+        { State.UPSMASH,        new string[] { UpSmash, } },
 
         //transition states
         { State.LEDGEDROPPING,  new string[] { LedgeDropping, } },
@@ -118,7 +132,7 @@ public class AnimatorManager : MonoBehaviour {
 
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, Tumbling, Reeling, } },
-        { State.ATTACKING,      new string[] { NeutralAttack, ForwardTiltAttack, DownTiltAttack, UpTiltAttack, } },   
+        { State.ATTACKING,      new string[] { NeutralAttack, ForwardTiltAttack, DownTiltAttack, UpTiltAttack, NeutralSmash, ForwardSmash, DownSmash, UpSmash} },   
         { State.DEAD,           new string[] { MostlyDead, AllDead, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
