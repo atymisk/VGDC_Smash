@@ -150,8 +150,8 @@ public class AnimatorManager : MonoBehaviour {
     };
     private Animator theStateMachine;
 
-    private float timerTime = 0;
-    private float timerMultiplier = 1;
+    private int timerTime = 0;
+    private int timerEnd = 1;
 	// Use this for initialization
 	void Start () {
         theStateMachine = GetComponent<Animator>();
@@ -161,10 +161,13 @@ public class AnimatorManager : MonoBehaviour {
 	void Update () {
         if (timerTime > 0)
         {
-            timerTime += Time.deltaTime / timerMultiplier;
-            theStateMachine.SetFloat("timer", timerTime);
-            if (timerTime > 1)
+            timerTime += 1;
+
+            if (timerTime >= timerEnd)
+            {
                 timerTime = 0;
+                theStateMachine.SetBool(Triggers.timerDone, true);
+            }
         }
 	}
 
@@ -180,10 +183,10 @@ public class AnimatorManager : MonoBehaviour {
         return false;
     }
 
-    public void startTimer(float timeMultiplier) //only used for Reeling exit
+    public void startTimer(int numFrames) //only used for Reeling exit
     {
-        timerMultiplier = timeMultiplier; //set the new cutoff
-        if (timerTime == 0) //if the timer isn't running, run the timer
-            timerTime += Time.deltaTime / timerMultiplier;
+        timerTime = 1;
+        timerEnd = numFrames;
+        theStateMachine.SetBool(Triggers.timerDone, false);
     }
 }

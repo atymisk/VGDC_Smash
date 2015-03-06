@@ -23,4 +23,6 @@ public class Triggers : MonoBehaviour
     public const string StunExit = "StunExit";
 
     public const string ShieldHealth = "ShieldHealth";
+
+    public const string timerDone = "timerDone";
 }
