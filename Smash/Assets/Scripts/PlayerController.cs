@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour
 
     private float shieldHealth;
     private float attackDamage = 100.0f;  // damage for a neutral attack
-
+    private bool deadPhysics = true; // we start suspended
 	// INITIALIZE
 	void Awake ()
 	{
@@ -89,7 +89,9 @@ public class PlayerController : MonoBehaviour
 		accelerations.Add(AccelType.FALL, new Acceleration(null, maxFallSpeed * -1, null, fallAccel));
 		accelerations.Add(AccelType.MOVE, new Acceleration(0f, null, null, midairAcceleration));
 		accelerations.Add(AccelType.JUMP, new Acceleration(null, null, null, 0f));
-        
+
+        EnableAccel(AccelType.FALL, false); //player starts the game suspended
+
 		// Initialize timers. (not f2p timers, thank god)
 		timers = new Dictionary<TimerType, int>();
 		timers.Add (TimerType.JUMP, MAX_JUMP_FRAMES);
@@ -145,6 +147,8 @@ public class PlayerController : MonoBehaviour
         DoPlatformDrop();
 		DoFall ();
 		DoDrop ();
+
+        DoPhysicsChecks();
 
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
@@ -483,6 +487,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void DoPhysicsChecks()
+    {
+        if (deadPhysics && !InState(AnimatorManager.State.DEAD))
+        {
+            EnableAccel(AccelType.FALL, true);
+            deadPhysics = false;
+        }
+
+        if(!deadPhysics && InState(AnimatorManager.State.DEAD))
+            deadPhysics = true;
+    }
+
     void SetPlatformCollision(bool toggle)
     {
         foreach (Collider platformCollider in platformColliders)
@@ -506,6 +522,8 @@ public class PlayerController : MonoBehaviour
         theStateMachine.ResetTrigger(Triggers.ReelingEnter);
 
         theStateMachine.SetTrigger(Triggers.Death);
+        EnableAccel(AccelType.FALL, false);         // disable falling while respawning
+        
         SetPlatformCollision(true);                 // reset platform collision
     }
 

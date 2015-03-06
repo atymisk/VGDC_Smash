@@ -20,6 +20,7 @@ public class AnimatorManager : MonoBehaviour {
         REELING,
         MOSTLYDEAD,
         ALLDEAD,
+        RESPAWNING,
         DOWNED,
         LANDING,
         BLOCKING,
@@ -75,6 +76,8 @@ public class AnimatorManager : MonoBehaviour {
     //Miracle Max: There's a big difference between mostly dead and all dead. Mostly dead is slightly alive. With all dead, well, with all dead there's usually only one thing you can do.
     //Inigo Montoya: What's that?
     //Miracle Max: Go through his clothes and look for loose change.
+    private const string Respawning = "Respawning";
+
     private const string Downed = "Downed";
 
 
@@ -105,6 +108,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.REELING,        new string[] { Reeling, } },
         { State.MOSTLYDEAD,     new string[] { MostlyDead, } },
         { State.ALLDEAD,        new string[] { AllDead, } },
+        { State.RESPAWNING,     new string[] { Respawning, } },
         { State.DOWNED,         new string[] { Downed, } },
         { State.LANDING,        new string[] { Landing, } },
         { State.BLOCKING,       new string[] { Blocking, } },
@@ -133,15 +137,15 @@ public class AnimatorManager : MonoBehaviour {
         //generalized states
         { State.MIDAIR,         new string[] { Rising, Falling, LedgeDropping, Tumbling, Reeling, } },
         { State.ATTACKING,      new string[] { NeutralAttack, ForwardTiltAttack, DownTiltAttack, UpTiltAttack, NeutralSmash, ForwardSmash, DownSmash, UpSmash} },   
-        { State.DEAD,           new string[] { MostlyDead, AllDead, } },
+        { State.DEAD,           new string[] { MostlyDead, AllDead, Respawning, } },
         { State.GROUNDINCAPACITATED,  new string[] { Unconscious, Downed, Recovering, } },
         { State.AIRINCAPACITATED,   new string[] { Reeling, Tumbling, } },
         { State.DASHING,        new string[] { GroundDashing, AirDashing, } },
 
         //possibility states
         { State.CANMOVE,        new string[] { Rising, Falling, Grounded, Tumbling, AirDashing, } },
-        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, LedgeGrabbing, } },
-        { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Unconscious, Downed, Recovering, Reeling, GroundDashing, AirDashing, } },
+        { State.CANJUMP,        new string[] { Rising, Falling, Grounded, Tumbling, LedgeDropping, LedgeGrabbing, Respawning, } },
+        { State.UNTOUCHABLE,    new string[] { LedgeGrabbing, MostlyDead, AllDead, Respawning, Unconscious, Downed, Recovering, Reeling, GroundDashing, AirDashing, } },
 
     };
     private Animator theStateMachine;
