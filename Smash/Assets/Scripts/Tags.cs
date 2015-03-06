@@ -20,7 +20,7 @@ public class Triggers : MonoBehaviour
     public const string ReelingEnter = "ReelingEnter";
     public const string MovingDown = "MovingDown";
 
-    public const string InputDuckTrigger = "InputDuckTrigger";
+    public const string StunExit = "StunExit";
 
     public const string ShieldHealth = "ShieldHealth";
 }

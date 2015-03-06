@@ -23,6 +23,7 @@ public class AnimatorManager : MonoBehaviour {
         DOWNED,
         LANDING,
         BLOCKING,
+        STUNNED,
         GROUNDDASHING,
         AIRDASHING,
 
@@ -60,6 +61,7 @@ public class AnimatorManager : MonoBehaviour {
     private const string Reeling = "Reeling";
     private const string Landing = "Landing";
     private const string Blocking = "Blocking";
+    private const string Stunned = "Stunned";
     private const string GroundDashing = "GroundDashing";
     private const string AirDashing = "AirDashing";
 
@@ -97,6 +99,7 @@ public class AnimatorManager : MonoBehaviour {
         { State.DOWNED,         new string[] { Downed, } },
         { State.LANDING,        new string[] { Landing, } },
         { State.BLOCKING,       new string[] { Blocking, } },
+        { State.STUNNED,        new string[] { Stunned,} },
         { State.GROUNDDASHING,  new string[] { GroundDashing, } },
         { State.AIRDASHING,     new string[] { AirDashing, } },
 

@@ -218,32 +218,8 @@ public class PlayerController : MonoBehaviour
 
         if (!didDamage && InState(AnimatorManager.State.ATTACKING))
         {
-            if(otherController.InState(AnimatorManager.State.ATTACKING)) //both are attacking each other, do priority check to see if we do damage to them
-            {
-                if (otherController.attackPriority <= this.attackPriority) //their attack is weaker
-                {
-                    didDamage = true;
-                    attackPriority = -1;
-                    Animator otherAnimator = other.transform.parent.GetComponent<Animator>();
-                    otherAnimator.SetTrigger(Triggers.ReelingEnter);
-
-                    otherAnimator.SetBool(Triggers.PlatformGrounded, false); //the knockback will take them off of the stage
-                    otherAnimator.SetBool(Triggers.StageGrounded, false);
-
-                    other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(attackDamage, transform.position);
-                    
-                    other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
-                }
-                //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
-            }
-            else if (otherController.InState(AnimatorManager.State.BLOCKING)) //our attack is blocked
-            {
-                didDamage = true;
-                attackPriority = -1;
-
-                otherController.TakeBlockHit(attackDamage);
-            }
-            else if (!otherController.InState(AnimatorManager.State.UNTOUCHABLE)) //they aren't attacking; we're attacking them
+            if (otherController.InState(AnimatorManager.State.ATTACKING) && otherController.attackPriority <= this.attackPriority //both are attacking each other, do priority check to see if we do damage to them
+                || !otherController.InState(AnimatorManager.State.UNTOUCHABLE)) //they aren't attacking; we're attacking them
             {
                 didDamage = true;
                 attackPriority = -1;
@@ -256,6 +232,18 @@ public class PlayerController : MonoBehaviour
                 other.transform.parent.GetComponent<PlayerStateScript>().TakeHit(attackDamage, transform.position);
 
                 other.transform.parent.GetComponent<AnimatorManager>().startTimer(1f);
+                //the other player's player collider will do the stuff needed if our attack priority is lower than theirs
+
+                if(otherController.InState(AnimatorManager.State.STUNNED))
+                    otherAnimator.SetTrigger(Triggers.StunExit);
+
+            }
+            else if (otherController.InState(AnimatorManager.State.BLOCKING)) //our attack is blocked
+            {
+                didDamage = true;
+                attackPriority = -1;
+
+                otherController.TakeBlockHit(attackDamage);
             }
         }
     }
