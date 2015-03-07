@@ -49,6 +49,65 @@ public class Controls : MonoBehaviour {
         return controllerStrings[con];
     }
 
+    // the dictionary of command-to-key dictionaries, one dictionary for each controller.
+    private static Dictionary<Controller, Dictionary<Command, HashSet<KeyCode>>> theInputMap = new Dictionary<Controller, Dictionary<Command, HashSet<KeyCode>>>
+    {
+        { Controller.ONE, 
+            new Dictionary<Command, HashSet<KeyCode>>
+            {
+                { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick1Button0, KeyCode.M, } },
+                { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick1Button1, KeyCode.Comma, } },
+                { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick1Button4, KeyCode.Period, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick1Button5, KeyCode.Slash, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick1Button2, KeyCode.Joystick1Button3 } }, 
+                // not actually alpha keys; those are overrides so that the code knows to use axes instead
+                { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
+                { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+            }
+        },
+        { Controller.TWO, 
+            new Dictionary<Command, HashSet<KeyCode>>
+            {
+                { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick2Button0, KeyCode.C, } },
+                { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick2Button1, KeyCode.V, } },
+                { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick2Button4, KeyCode.B, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick2Button5, KeyCode.N, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick2Button2, KeyCode.Joystick2Button3 } }, 
+                // not actually alpha keys; those are overrides so that the code knows to use axes instead
+                { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
+                { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+            }
+        },
+        { Controller.THREE, 
+            new Dictionary<Command, HashSet<KeyCode>>
+            {
+                //I'm out of keys, so no keyboard stuff
+                { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick3Button0, } },
+                { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick3Button1, } },
+                { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick3Button4, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick3Button5, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick3Button2, KeyCode.Joystick3Button3 } }, 
+                // not actually alpha keys; those are overrides so that the code knows to use axes instead
+                { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
+                { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+            }
+        },
+        { Controller.FOUR, 
+            new Dictionary<Command, HashSet<KeyCode>>
+            {
+                //I'm out of keys, so no keyboard stuff
+                { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick4Button0, } },
+                { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick4Button1, } },
+                { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick4Button4, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick4Button5, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick4Button2, KeyCode.Joystick4Button3 } }, 
+                // not actually alpha keys; those are overrides so that the code knows to use axes instead
+                { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
+                { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+            }
+        },
+    };
+
     public Controller controller;
 
 	// PRIVATE VARIABLES
@@ -120,13 +179,7 @@ public class Controls : MonoBehaviour {
 	// INITIALIZERS
 	private void InitializeKeyDict()
 	{
-		keyDict[Command.ATTACK] = new HashSet<KeyCode>{KeyCode.JoystickButton0, KeyCode.X, KeyCode.K};
-		keyDict[Command.SPECIAL] = new HashSet<KeyCode>{KeyCode.JoystickButton1, KeyCode.Y, KeyCode.L};
-        keyDict[Command.BLOCK] = new HashSet<KeyCode> { KeyCode.JoystickButton2, KeyCode.H }; // @TODO: map these to the correct joystick codes (bumpers+triggers)
-        keyDict[Command.DASH] = new HashSet<KeyCode> { KeyCode.JoystickButton3, KeyCode.J };
-		keyDict[Command.JUMP] = new HashSet<KeyCode>{KeyCode.Alpha0, KeyCode.JoystickButton2, KeyCode.JoystickButton3};
-		keyDict[Command.DUCK] = new HashSet<KeyCode>{KeyCode.Alpha1};
-		keyDict[Command.MOVE] = new HashSet<KeyCode>{KeyCode.Alpha2};
+        keyDict = theInputMap[controller];
 	}
 	private void InitializeHoldDict() { foreach (Command com in keyDict.Keys) holdDict[com] = 0f; }
 	private void InitializeStartDict() { foreach (Command com in keyDict.Keys) startDict[com] = false; }
