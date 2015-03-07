@@ -15,6 +15,13 @@ public class Controls : MonoBehaviour {
         DASH,
 	};
 
+    public enum Controller {
+        ONE,
+        TWO,
+        THREE,
+        FOUR,
+    }
+
     private static Dictionary<Command, string> commandStrings = new Dictionary<Command, string>
     { 
         { Command.ATTACK, "InputAttack" },
@@ -29,6 +36,20 @@ public class Controls : MonoBehaviour {
     {
         return commandStrings[com];
     }
+
+    private static Dictionary<Controller, string> controllerStrings = new Dictionary<Controller, string>
+    {
+        { Controller.ONE, "One" },
+        { Controller.TWO, "Two" },
+        { Controller.THREE, "Three" },
+        { Controller.FOUR, "Four" },
+    };
+    public static string ControllerToString(Controller con)
+    {
+        return controllerStrings[con];
+    }
+
+    public Controller controller;
 
 	// PRIVATE VARIABLES
 	private Dictionary<Command, float> holdDict;			// tracks command hold duration
@@ -152,7 +173,7 @@ public class Controls : MonoBehaviour {
 	private Vector2 GetNormalizedAxisInput()
 	{
 		float deadZone = 0.2f;
-		Vector2 inputVec = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector2 inputVec = new Vector2(Input.GetAxis("Horizontal" + ControllerToString(controller)), Input.GetAxis("Vertical" + ControllerToString(controller)));
 		if (inputVec.magnitude < deadZone)
 			return Vector2.zero;
 		return inputVec.normalized * ((inputVec.magnitude - deadZone) / (1 - deadZone));
