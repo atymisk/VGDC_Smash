@@ -9,11 +9,12 @@ public class PlayerStateScript : MonoBehaviour {
     private float currentDamage;
     private PlayerController controller;                    //reference to playercontroller
     private Animator theStateMachine;                       //reference to state machine
-
+    private CameraController cam;                           //reference to camera controller for screen shake effect
 	// Use this for initialization
 	void Start () {
 	    currentDamage = 0;
         controller = GetComponent<PlayerController>();
+        cam = GameObject.FindGameObjectWithTag(Tags.camera).GetComponent<CameraController>();
         theStateMachine = GetComponent<Animator>();
         theStateMachine.SetInteger("numLives", numLives);
 	}
@@ -45,7 +46,7 @@ public class PlayerStateScript : MonoBehaviour {
         numLives = numLives - 1;
         theStateMachine.SetInteger("numLives", numLives);
         controller.ResetPosition();
-
+        cam.ScreenShake(10, 3);
     }
 
     float GetCurrentDamage()

@@ -9,6 +9,7 @@ public class Tags : MonoBehaviour {
 	public const string GrabEdge = "GrabEdge";
 	public const string StopEdge = "StopEdge";
     public const string Platform = "Platform";
+    public const string camera = "MainCamera";
 }
 
 public class Triggers : MonoBehaviour

@@ -9,20 +9,24 @@ public class CameraController : MonoBehaviour {
 	private GameObject[] players;
 	private Camera cam;
     private Resolution resolution;
+    private Transform holder; //move the holder for normal movement, not the camera
 
+    private int screenShakeFramesLeft = 0;
+    private float screenShakeIntensity = 0;
 	void Awake()
 	{
 		players = GameObject.FindGameObjectsWithTag(Tags.Player);
 		cam = GetComponent<Camera>();
         resolution = Screen.currentResolution; // may need to do checking to check if resolution has been changed
+        holder = this.transform.parent;
 	}
 
-	void Update()
+	void FixedUpdate()
 	{
-		float minx = cam.transform.position.x;
-		float maxx = cam.transform.position.x;
-		float miny = cam.transform.position.y;
-		float maxy = cam.transform.position.y;
+		float minx = holder.position.x;
+        float maxx = holder.position.x;
+        float miny = holder.position.y;
+        float maxy = holder.position.y;
 
 		foreach (GameObject player in players)
 		{
@@ -42,7 +46,7 @@ public class CameraController : MonoBehaviour {
 
         float xrange = Mathf.Abs(minx - maxx) + sizeBuffer;
         float yrange = Mathf.Abs(miny - maxy) + sizeBuffer;
-        float z = cam.transform.position.z;
+        float z = holder.position.z;
         if (xrange / resolution.width > yrange / resolution.height)
         {
             z = xrange;
@@ -52,6 +56,26 @@ public class CameraController : MonoBehaviour {
             yrange = resolution.width * yrange / resolution.height;
             z = yrange;
         }
-        cam.transform.position = Vector3.Lerp(cam.transform.position, new Vector3(midx, midy, zScalar* z), smoothing * Time.deltaTime);
+        holder.position = Vector3.Lerp(holder.position, new Vector3(midx, midy, zScalar * z), smoothing * Time.deltaTime);
+
+        //now for screen shake
+        if (screenShakeFramesLeft > 0)
+        {
+            Debug.Log("Shake");
+            screenShakeFramesLeft = screenShakeFramesLeft - 1;
+            cam.transform.localPosition = Random.insideUnitSphere * screenShakeIntensity;
+
+        }
+        else if (screenShakeFramesLeft == 0) //cleanup
+        {
+            screenShakeFramesLeft = -1;
+            cam.transform.localPosition = new Vector3(0, 0, 0); //reset back to normal position
+        }
 	}
+    public void ScreenShake(int frames, float intensity)
+    {
+        screenShakeFramesLeft = frames;
+        screenShakeIntensity = intensity;
+    }
+
 }
