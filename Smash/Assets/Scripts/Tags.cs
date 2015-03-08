@@ -2,6 +2,9 @@
 using System.Collections;
 
 public class Tags : MonoBehaviour {
+
+    //for autocomplete and auto-update
+
 	public const string Stage = "Stage";
 	public const string Player = "Player";
     public const string PlayerTrigger = "PlayerTrigger";
@@ -9,7 +12,8 @@ public class Tags : MonoBehaviour {
 	public const string GrabEdge = "GrabEdge";
 	public const string StopEdge = "StopEdge";
     public const string Platform = "Platform";
-    public const string camera = "MainCamera";
+    public const string Camera = "MainCamera";
+    public const string UI = "UI";
 }
 
 public class Triggers : MonoBehaviour
