@@ -57,6 +57,7 @@
      <Compile Include="Assets\Scripts\PlayerStateScript.cs" />
      <Compile Include="Assets\Scripts\PlayerTriggerColliderScript.cs" />
      <Compile Include="Assets\Scripts\Tags.cs" />
+     <Compile Include="Assets\Scripts\UIController.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity4.6B20/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.2/UnityEngine.UI.dll</HintPath>
  </Reference>

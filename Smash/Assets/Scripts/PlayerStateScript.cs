@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
+
 
 public class PlayerStateScript : MonoBehaviour {
     public float maxDamage = 500;
@@ -12,19 +12,17 @@ public class PlayerStateScript : MonoBehaviour {
     private PlayerController controller;                    //reference to playercontroller
     private Animator theStateMachine;                       //reference to state machine
     private CameraController cam;                           //reference to camera controller for screen shake effect
-    private Text damageReadout;
-    private Image livesReadout;
+    private UIController UI;                                   //reference to UI controller to update the UI readouts
 	// Use this for initialization
 	void Start () {
 	    currentDamage = 0;
         controller = GetComponent<PlayerController>();
         cam = GameObject.FindGameObjectWithTag(Tags.Camera).GetComponent<CameraController>();
-        damageReadout = GameObject.FindWithTag(Tags.UI).transform.FindChild("Player" + Controls.ControllerToString(playerNumber)).FindChild("HealthNumber").GetComponent<Text>();
-        livesReadout = GameObject.FindWithTag(Tags.UI).transform.FindChild("Player" + Controls.ControllerToString(playerNumber)).FindChild("LivesImage").GetComponent<Image>();
+        UI = GameObject.FindWithTag(Tags.UI).transform.FindChild("Player" + Controls.ControllerToString(playerNumber)).GetComponent<UIController>();
         theStateMachine = GetComponent<Animator>();
         theStateMachine.SetInteger("numLives", numLives);
 
-        updateUI();
+        UI.Update(damage: currentDamage, lives: numLives);
 	}
 
     public void TakeHit(float damage, Vector3 hitOrigin)
@@ -56,7 +54,7 @@ public class PlayerStateScript : MonoBehaviour {
         controller.ResetPosition();
         cam.ScreenShake(10, 3);
 
-        updateUI();
+        UI.Update(lives: numLives);
     }
 
 
@@ -64,27 +62,17 @@ public class PlayerStateScript : MonoBehaviour {
     void AddDamage(float damage)
     {
         currentDamage += damage;
-        updateUI();
+        UI.Update(damage: currentDamage);
     }
 
     void SetDamage(float damage)
     {
         currentDamage = damage;
-        updateUI();
+        UI.Update(damage: currentDamage);
     }
 
     float GetCurrentDamage()
     {
         return currentDamage;
-    }
-
-    void updateUI()
-    {
-        Debug.Log("updating UI");
-        damageReadout.text = currentDamage + "%";
-
-        float newWidth = (numLives) * 20;
-        livesReadout.rectTransform.sizeDelta = new Vector2(newWidth, 20);
-        livesReadout.rectTransform.localPosition = new Vector2(newWidth/2 - 40, 15);
     }
 }
