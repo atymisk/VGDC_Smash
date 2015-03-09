@@ -34,13 +34,15 @@ public class UIController : MonoBehaviour {
         background.color = backgroundColor;
     }
 
-    public void Update(float damage = -1, int lives = -1)
+    public void UpdateUI(float damage = -1, int lives = -1)
     {
+        if (damageReadout == null || livesReadout == null || background == null) //then this hasn't been initialized yet
+            Start();
         if (damage != -1)
             this.currentDamage = damage;
         if (lives != -1)
             this.numLives = lives;
-        
+        Debug.Log("Update!");
         UpdateText();
         UpdateLives();
         ShowBackground();

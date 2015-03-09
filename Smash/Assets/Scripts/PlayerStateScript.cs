@@ -22,7 +22,7 @@ public class PlayerStateScript : MonoBehaviour {
         theStateMachine = GetComponent<Animator>();
         theStateMachine.SetInteger("numLives", numLives);
 
-        UI.Update(damage: currentDamage, lives: numLives);
+        UI.UpdateUI(damage: currentDamage, lives: numLives);
 	}
 
     public void TakeHit(float damage, Vector3 hitOrigin)
@@ -54,7 +54,7 @@ public class PlayerStateScript : MonoBehaviour {
         controller.ResetPosition();
         cam.ScreenShake(10, 3);
 
-        UI.Update(lives: numLives);
+        UI.UpdateUI(lives: numLives);
     }
 
 
@@ -62,13 +62,13 @@ public class PlayerStateScript : MonoBehaviour {
     void AddDamage(float damage)
     {
         currentDamage += damage;
-        UI.Update(damage: currentDamage);
+        UI.UpdateUI(damage: currentDamage);
     }
 
     void SetDamage(float damage)
     {
         currentDamage = damage;
-        UI.Update(damage: currentDamage);
+        UI.UpdateUI(damage: currentDamage);
     }
 
     float GetCurrentDamage()
