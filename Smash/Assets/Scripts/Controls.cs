@@ -13,6 +13,8 @@ public class Controls : MonoBehaviour {
         MOVE,
         BLOCK,
         DASH,
+        GRAB,
+        DODGE,
 	};
 
     public enum Controller {
@@ -31,6 +33,8 @@ public class Controls : MonoBehaviour {
         { Command.MOVE, "InputMove" },
         { Command.BLOCK, "InputBlock" },
         { Command.DASH, "InputDash" },
+        { Command.GRAB, "InputGrab" },
+        { Command.DODGE, "InputDodge" },
     };
     public static string CommandToString(Command com)
     {
@@ -58,11 +62,13 @@ public class Controls : MonoBehaviour {
                 { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick1Button0, KeyCode.M, } },
                 { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick1Button1, KeyCode.Comma, } },
                 { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick1Button4, KeyCode.Period, } },
-                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick1Button5, KeyCode.Slash, } },
-                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick1Button2, KeyCode.Joystick1Button3 } }, 
+                { Command.GRAB,     new HashSet<KeyCode> { KeyCode.Joystick1Button3, KeyCode.Slash, } },
+                { Command.DODGE,    new HashSet<KeyCode> { KeyCode.Joystick1Button5, KeyCode.RightControl, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick1Button2, } }, 
                 // not actually alpha keys; those are overrides so that the code knows to use axes instead
                 { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
                 { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Alpha3, } },
             }
         },
         { Controller.TWO, 
@@ -71,11 +77,13 @@ public class Controls : MonoBehaviour {
                 { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick2Button0, KeyCode.C, } },
                 { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick2Button1, KeyCode.V, } },
                 { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick2Button4, KeyCode.B, } },
-                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick2Button5, KeyCode.N, } },
-                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick2Button2, KeyCode.Joystick2Button3 } }, 
+                { Command.GRAB,     new HashSet<KeyCode> { KeyCode.Joystick2Button3, KeyCode.N, } },
+                { Command.DODGE,    new HashSet<KeyCode> { KeyCode.Joystick2Button5, KeyCode.X, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick2Button2, } }, 
                 // not actually alpha keys; those are overrides so that the code knows to use axes instead
                 { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
                 { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Alpha3, } },
             }
         },
         { Controller.THREE, 
@@ -85,11 +93,13 @@ public class Controls : MonoBehaviour {
                 { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick3Button0, } },
                 { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick3Button1, } },
                 { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick3Button4, } },
-                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick3Button5, } },
-                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick3Button2, KeyCode.Joystick3Button3 } }, 
+                { Command.GRAB,     new HashSet<KeyCode> { KeyCode.Joystick3Button3, } },
+                { Command.DODGE,    new HashSet<KeyCode> { KeyCode.Joystick3Button5, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick3Button2, } }, 
                 // not actually alpha keys; those are overrides so that the code knows to use axes instead
                 { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
                 { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Alpha3, } },
             }
         },
         { Controller.FOUR, 
@@ -99,11 +109,13 @@ public class Controls : MonoBehaviour {
                 { Command.ATTACK,   new HashSet<KeyCode> { KeyCode.Joystick4Button0, } },
                 { Command.SPECIAL,  new HashSet<KeyCode> { KeyCode.Joystick4Button1, } },
                 { Command.BLOCK,    new HashSet<KeyCode> { KeyCode.Joystick4Button4, } },
-                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Joystick4Button5, } },
-                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick4Button2, KeyCode.Joystick4Button3 } }, 
+                { Command.GRAB,     new HashSet<KeyCode> { KeyCode.Joystick4Button3, } },
+                { Command.DODGE,    new HashSet<KeyCode> { KeyCode.Joystick4Button5, } },
+                { Command.JUMP,     new HashSet<KeyCode> { KeyCode.Alpha0, KeyCode.Joystick4Button2, } }, 
                 // not actually alpha keys; those are overrides so that the code knows to use axes instead
                 { Command.DUCK,     new HashSet<KeyCode> { KeyCode.Alpha1, } },
                 { Command.MOVE,     new HashSet<KeyCode> { KeyCode.Alpha2, } },
+                { Command.DASH,     new HashSet<KeyCode> { KeyCode.Alpha3, } },
             }
         },
     };
@@ -117,7 +129,7 @@ public class Controls : MonoBehaviour {
 	private Dictionary<Command, bool> endDict;				// track newly ended commands
     private Animator theStateMachine;
 	private float previousFacing;
-	private Vector2 stickInput;
+	private Vector3 stickInput;
 
 	// INITIALIZE
 	void Awake()
@@ -127,7 +139,7 @@ public class Controls : MonoBehaviour {
 		startDict = new Dictionary<Command, bool>();
 		endDict = new Dictionary<Command, bool>();
 		previousFacing = 0f;
-		stickInput = Vector2.zero;
+		stickInput = Vector3.zero;
         theStateMachine = GetComponent<Animator>();
         InitializeKeyDict();
 		InitializeHoldDict();
@@ -152,7 +164,9 @@ public class Controls : MonoBehaviour {
 				// Otherwise, either command isn't being issued or command is being issue in same direction
 				previousFacing = Mathf.Sign(mag);	// assign new facing
 			}
+            
 			if (!switchDir) {
+                
 				if (GetCommand (com)) {			// if the command is being issued ...
                     if (holdDict[com] == 0f)
                     {
@@ -162,6 +176,8 @@ public class Controls : MonoBehaviour {
                     endDict[com] = false;
 					holdDict[com] += Time.deltaTime;	// add to hold time
                     theStateMachine.SetBool(CommandToString(com) + "Bool", true);
+                    //if (com == Command.DASH)
+                        //Debug.Log(GetCommand(com));
 				} else {						// Otherwise ...
                     if (holdDict[com] > 0f)
                     {
@@ -210,25 +226,36 @@ public class Controls : MonoBehaviour {
 	{
 		HashSet<KeyCode> validKeys = keyDict[com];
 		foreach (KeyCode s in validKeys) {
-			if (Input.GetKey (s))						// Normal commands
-				return 1f;
-			else if (s == KeyCode.Alpha0 && stickInput.y > 0.3f)	// Alpha0 reserved for up command
-				return 1f;
-			else if (s == KeyCode.Alpha1 && stickInput.y < -0.5f)	// Alpha1 reserved for down command
-				return 1f;
-			else if (s == KeyCode.Alpha2 && stickInput.x != 0f)		// Alpha 2 reserved for horizontal moves
-				return stickInput.x;
+
+            if (Input.GetKey(s))						// Normal commands
+                return 1f;
+            else if (s == KeyCode.Alpha0 && stickInput.y > 0.3f)	// Alpha0 reserved for up command
+                return 1f;
+            else if (s == KeyCode.Alpha1 && stickInput.y < -0.5f)	// Alpha1 reserved for down command
+                return 1f;
+            else if (s == KeyCode.Alpha2 && stickInput.x != 0f)		// Alpha 2 reserved for horizontal moves
+                return stickInput.x;
+            else if (s == KeyCode.Alpha3 && stickInput.z > 0.3f)     // Alpha 3 reserved for dashing (3rd axis would be Left Trigger/Right Trigger)
+            {
+                return 1f;
+            }
+            else if (s == KeyCode.Alpha3 && stickInput.z < -0.3f)
+            {
+                return 1f;
+            }
         }
         return 0f;
 	}
 
 	// GetNormalizedAxisInput: normalize stick input and return as Vector2
-	private Vector2 GetNormalizedAxisInput()
+	private Vector3 GetNormalizedAxisInput()
 	{
-		float deadZone = 0.2f;
-        Vector2 inputVec = new Vector2(Input.GetAxis("Horizontal" + ControllerToString(controller)), Input.GetAxis("Vertical" + ControllerToString(controller)));
+		float deadZone = 0.1f;
+        Vector3 inputVec = new Vector3(Input.GetAxis("Horizontal" + ControllerToString(controller)), Input.GetAxis("Vertical" + ControllerToString(controller)), Input.GetAxis("Third" + ControllerToString(controller)));
 		if (inputVec.magnitude < deadZone)
-			return Vector2.zero;
+			return Vector3.zero;
+        //Debug.Log((inputVec.normalized * ((inputVec.magnitude - deadZone) / (1 - deadZone))).z);
 		return inputVec.normalized * ((inputVec.magnitude - deadZone) / (1 - deadZone));
+
 	}
 }
