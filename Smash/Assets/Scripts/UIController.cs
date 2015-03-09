@@ -42,7 +42,6 @@ public class UIController : MonoBehaviour {
             this.currentDamage = damage;
         if (lives != -1)
             this.numLives = lives;
-        Debug.Log("Update!");
         UpdateText();
         UpdateLives();
         ShowBackground();

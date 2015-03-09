@@ -211,7 +211,6 @@ public class Controls : MonoBehaviour {
 	{
 		bool result = startDict[com];
 		startDict[com] = false;
-        theStateMachine.ResetTrigger(CommandToString(com) + "Trigger");
 		return result;
 	}
 	public bool ConsumeCommandEnd(Command com)
@@ -220,6 +219,11 @@ public class Controls : MonoBehaviour {
 		endDict[com] = false;
 		return result;
 	}
+    public bool ConsumeTriggerStart(Command com)
+    {
+        theStateMachine.ResetTrigger(CommandToString(com) + "Trigger");
+        return ConsumeCommandStart(com);
+    }
 
 	// GetCommandMagnitude: check the valid keys for a given command and return its magnitude.
 	public float GetCommandMagnitude(Command com)
@@ -235,13 +239,9 @@ public class Controls : MonoBehaviour {
                 return 1f;
             else if (s == KeyCode.Alpha2 && stickInput.x != 0f)		// Alpha 2 reserved for horizontal moves
                 return stickInput.x;
-            else if (s == KeyCode.Alpha3 && stickInput.z > 0.3f)     // Alpha 3 reserved for dashing (3rd axis would be Left Trigger/Right Trigger)
+            else if (s == KeyCode.Alpha3 && stickInput.z != 0f)     // Alpha 3 reserved for dashing (3rd axis would be Left Trigger/Right Trigger)
             {
-                return 1f;
-            }
-            else if (s == KeyCode.Alpha3 && stickInput.z < -0.3f)
-            {
-                return 1f;
+                return stickInput.z;
             }
         }
         return 0f;

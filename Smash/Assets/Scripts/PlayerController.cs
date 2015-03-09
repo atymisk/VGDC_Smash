@@ -391,15 +391,15 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
-        if (InState(AnimatorManager.State.GROUNDED) && controls.GetCommand(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
+        if (InState(AnimatorManager.State.GROUNDED) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
             SetVelocity(maxRunSpeed * sign, 0f, null);
-        if (InState(AnimatorManager.State.MIDAIR) && controls.GetCommand(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start an air dash
+        if (InState(AnimatorManager.State.MIDAIR) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start an air dash
             SetVelocity(midairSpeed * sign, null, null);
 	}
 	void DoJump()
 	{
         // On jump start ...
-        if (controls.ConsumeCommandStart(Controls.Command.JUMP) && CanJump())
+        if (controls.ConsumeTriggerStart(Controls.Command.JUMP) && CanJump())
         {
             accelerations[AccelType.FALL].Reset();			// reset gravity when another jump starts. for repeated accelerated falls.
             SetVelocity(null, 0f, null);					// reset vertical velocity for new jump
@@ -457,7 +457,7 @@ public class PlayerController : MonoBehaviour
 	}
     void DoDrop()
     {
-        if (CanDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK))
+        if (CanDrop() && controls.ConsumeTriggerStart(Controls.Command.DUCK))
         {
             SetAccel(AccelType.FALL, null, maxDropSpeed * -1f, null, dropAccel);
         }
@@ -469,7 +469,7 @@ public class PlayerController : MonoBehaviour
 
     void DoPlatformDrop()
     {
-        if (CanPlatformDrop() && controls.ConsumeCommandStart(Controls.Command.DUCK)) //normal platforms
+        if (CanPlatformDrop() && controls.ConsumeTriggerStart(Controls.Command.DUCK)) //normal platforms
         {
             //platform dropping code
 
@@ -481,7 +481,7 @@ public class PlayerController : MonoBehaviour
             
 
         }
-        if (CanLedgeDrop() && (controls.ConsumeCommandStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
+        if (CanLedgeDrop() && (controls.ConsumeTriggerStart(Controls.Command.DUCK) || TimerDone(TimerType.LEDGE_GRAB))) //dropping from a ledge grab
         {
             EnableAccel(AccelType.FALL, true);
             jumpCount = 0; // can't use ledge grabs to get more jumps
