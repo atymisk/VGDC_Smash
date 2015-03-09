@@ -392,9 +392,15 @@ public class PlayerController : MonoBehaviour
 		}
 
         if (InState(AnimatorManager.State.GROUNDED) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
+        {
+            sign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.DASH));
             SetVelocity(maxRunSpeed * sign, 0f, null);
+        }
         if (InState(AnimatorManager.State.MIDAIR) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start an air dash
+        {
+            sign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.DASH));
             SetVelocity(midairSpeed * sign, null, null);
+        }
 	}
 	void DoJump()
 	{
