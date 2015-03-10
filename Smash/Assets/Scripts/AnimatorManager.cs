@@ -27,6 +27,9 @@ public class AnimatorManager : MonoBehaviour {
         STUNNED,
         GROUNDDASHING,
         AIRDASHING,
+        DODGING,
+        GRABBING,
+        GRABBED,
 
         NEUTRALATTACK,
         FORWARDTILTATTACK,
@@ -70,6 +73,9 @@ public class AnimatorManager : MonoBehaviour {
     private const string Stunned = "Stunned";
     private const string GroundDashing = "GroundDashing";
     private const string AirDashing = "AirDashing";
+    private const string Dodging = "Dodging";
+    private const string Grabbing = "Grabbing";
+    private const string Grabbed = "Grabbed";
 
     private const string MostlyDead = "MostlyDead";
     private const string AllDead = "AllDead";
@@ -115,6 +121,9 @@ public class AnimatorManager : MonoBehaviour {
         { State.STUNNED,        new string[] { Stunned,} },
         { State.GROUNDDASHING,  new string[] { GroundDashing, } },
         { State.AIRDASHING,     new string[] { AirDashing, } },
+        { State.DODGING,        new string[] { } },
+        { State.GRABBING,        new string[] { } },
+        { State.GRABBED,        new string[] { } },
 
         //attacks
         { State.NEUTRALATTACK,   new string[] { NeutralAttack, } },
