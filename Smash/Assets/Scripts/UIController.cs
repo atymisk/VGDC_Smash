@@ -6,16 +6,17 @@ public class UIController : MonoBehaviour {
 
     private float currentDamage = 0;
     private int numLives = 0;
-    Text damageReadout;
-    Image livesReadout;
-    Image background;
+    private Text damageReadout;
+    private Image livesReadout;
+    private Image background;
+    private CanvasGroup group;          //for using UI alpha to enable/disable stuff
 	// Use this for initialization
 	void Start () {
         damageReadout = this.transform.FindChild("HealthNumber").GetComponent<Text>();
         livesReadout = this.transform.FindChild("LivesImage").GetComponent<Image>();
         background = this.GetComponent<Image>();
+        group = GetComponent<CanvasGroup>();
 	}
-    private static Color backgroundColor = new Color(1, 1, 1, 1);
 
     void UpdateText()
     {
@@ -29,9 +30,12 @@ public class UIController : MonoBehaviour {
         livesReadout.rectTransform.localPosition = new Vector2(newWidth / 2 - 40, 15);
     }
 
-    void ShowBackground()
+    void Show(bool enabled = true)
     {
-        background.color = backgroundColor;
+        if (enabled)
+            group.alpha = 1;
+        else
+            group.alpha = 0;
     }
 
     public void UpdateUI(float damage = -1, int lives = -1)
@@ -44,6 +48,6 @@ public class UIController : MonoBehaviour {
             this.numLives = lives;
         UpdateText();
         UpdateLives();
-        ShowBackground();
+        Show();
     }
 }
