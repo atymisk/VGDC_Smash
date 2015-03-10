@@ -61,7 +61,6 @@ public class CameraController : MonoBehaviour {
         //now for screen shake
         if (screenShakeFramesLeft > 0)
         {
-            Debug.Log("Shake");
             screenShakeFramesLeft = screenShakeFramesLeft - 1;
             cam.transform.localPosition = Random.insideUnitSphere * screenShakeIntensity;
 

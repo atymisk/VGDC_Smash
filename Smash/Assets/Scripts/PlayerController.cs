@@ -386,20 +386,23 @@ public class PlayerController : MonoBehaviour
 		} else {					// if not moving ...
             if (InState(AnimatorManager.State.MIDAIR))							// in midair apply midair drag
 				SetAccel(AccelType.MOVE, 0f, null, null, midairDrag);
-			else {
+			else if(!InState(AnimatorManager.State.GROUNDDASHING))
 				SetAccel(AccelType.MOVE, 0f, null, null, groundDrag);	// on ground apply ground drag
-			}
+            else
+                SetAccel(AccelType.MOVE, 0f, null, null, 0);	// no drag when dashing
 		}
 
-        if (InState(AnimatorManager.State.GROUNDED) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start a ground dash
+        if (InState(AnimatorManager.State.GROUNDED) && controls.ConsumeCommandStart(Controls.Command.DASH)) // start a ground dash
         {
             sign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.DASH));
+            SetAccel(AccelType.MOVE, maxRunSpeed * sign, null, null, groundAcceleration);
             SetVelocity(maxRunSpeed * sign, 0f, null);
         }
-        if (InState(AnimatorManager.State.MIDAIR) && controls.ConsumeCommandStart(Controls.Command.DASH) && controls.GetCommand(Controls.Command.MOVE)) // start an air dash
+        if (InState(AnimatorManager.State.MIDAIR) && controls.ConsumeCommandStart(Controls.Command.DASH)) // start an air dash
         {
             sign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.DASH));
             SetVelocity(midairSpeed * sign, null, null);
+            SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
         }
 	}
 	void DoJump()
