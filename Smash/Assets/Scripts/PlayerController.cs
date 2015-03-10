@@ -60,6 +60,7 @@ public class PlayerController : MonoBehaviour
 	private Controls controls;								// reference to input handler
     private PlayerStateScript stateScript;                  // reference to state script
     private AnimatorManager animatorManager;                // reference to animator handler
+    private Text entityPlate;                               // reference to our entityPlate
 	private int jumpCount;									// number of jumps
 	private Vector2 prevPos;
 	private Vector2 prevVel;
@@ -83,6 +84,7 @@ public class PlayerController : MonoBehaviour
         thisCollider = GetComponent<CapsuleCollider>();
         theStateMachine = GetComponent<Animator>();
         animatorManager = GetComponent<AnimatorManager>();
+        entityPlate = GetComponentInChildren<Text>();
 		// Initialize accelerations.
 		// @TODO: maybe move these into an entirely different acceleration handling class?
 		accelerations = new Dictionary<AccelType, Acceleration>();
@@ -122,6 +124,8 @@ public class PlayerController : MonoBehaviour
             platformColliders.Add(platformTransform.FindChild("stage_surface").GetComponent<MeshCollider>());
             platformColliders.Add(platformTransform.FindChild("stage_model").GetComponent<BoxCollider>());
         }
+
+        entityPlate.text = "P. " + Controls.ControllerToString(stateScript.playerNumber); // set our entityPlate text
 	}
 
 	// FIXED UPDATE : update interval is exactly 1/60
