@@ -60,7 +60,9 @@ public class PlayerController : MonoBehaviour
 	private Controls controls;								// reference to input handler
     private PlayerStateScript stateScript;                  // reference to state script
     private AnimatorManager animatorManager;                // reference to animator handler
-    private Text entityPlate;                               // reference to our entityPlate
+
+    private CanvasGroup entityPlate;                             // reference to our entityPlate
+    private Text entityPlateText;                               // reference to our entityPlate's Text
 	private int jumpCount;									// number of jumps
 	private Vector2 prevPos;
 	private Vector2 prevVel;
@@ -84,7 +86,8 @@ public class PlayerController : MonoBehaviour
         thisCollider = GetComponent<CapsuleCollider>();
         theStateMachine = GetComponent<Animator>();
         animatorManager = GetComponent<AnimatorManager>();
-        entityPlate = GetComponentInChildren<Text>();
+        entityPlate = GetComponentInChildren<CanvasGroup>();
+        entityPlateText = GetComponentInChildren<Text>();
 		// Initialize accelerations.
 		// @TODO: maybe move these into an entirely different acceleration handling class?
 		accelerations = new Dictionary<AccelType, Acceleration>();
@@ -125,7 +128,7 @@ public class PlayerController : MonoBehaviour
             platformColliders.Add(platformTransform.FindChild("stage_model").GetComponent<BoxCollider>());
         }
 
-        entityPlate.text = "P. " + Controls.ControllerToString(stateScript.playerNumber); // set our entityPlate text
+        entityPlateText.text = "P. " + Controls.ControllerToString(stateScript.playerNumber); // set our entityPlate text
 	}
 
 	// FIXED UPDATE : update interval is exactly 1/60
@@ -153,6 +156,8 @@ public class PlayerController : MonoBehaviour
 		DoDrop ();
 
         DoPhysicsChecks();
+
+        DoUIChecks();
 
 		// apply accelerations
 		foreach (AccelType accelType in accelerations.Keys)
@@ -511,6 +516,14 @@ public class PlayerController : MonoBehaviour
 
         if(!deadPhysics && InState(AnimatorManager.State.DEAD))
             deadPhysics = true;
+    }
+
+    void DoUIChecks()
+    {
+        if (InState(AnimatorManager.State.RESPAWNING))
+            entityPlate.alpha = 1;
+        else
+            entityPlate.alpha = 0;
     }
 
     void SetPlatformCollision(bool toggle)
