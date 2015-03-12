@@ -3,6 +3,8 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour {
 	
+    public AudioClip[] BGMPlaylist; //MUST BE ASSIGNED!
+    private int currentBGM = 0; //the playlist should be a queue, but it's easier on non-programmers if we make it an array
 	void Awake ()
 	{
 		Application.targetFrameRate = 60;
@@ -25,4 +27,16 @@ public class GameManager : MonoBehaviour {
             }
         }
 	}
+
+    void FixedUpdate()
+    {
+        if (!audio.isPlaying)
+        {
+            currentBGM += 1;
+            if(currentBGM >= BGMPlaylist.Length) //we've reached the end of the array and need to return to the beginning
+                currentBGM = 0;
+            audio.clip = BGMPlaylist[currentBGM];
+            audio.Play();
+        }
+    }
 }
