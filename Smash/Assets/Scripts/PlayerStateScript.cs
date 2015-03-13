@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 public class PlayerStateScript : MonoBehaviour {
 
@@ -10,6 +10,7 @@ public class PlayerStateScript : MonoBehaviour {
     public float verticalKnockback = 30;
     public Controls.Controller playerNumber;
     public GameObject[] projectilePrefabs;                  //set in the inspector
+    public Dictionary<string, GameObject> projectiles;
     private float currentDamage;
     private PlayerController controller;                    //reference to playercontroller
     private Animator theStateMachine;                       //reference to state machine

@@ -7,12 +7,10 @@ public class PHProjectile : Projectile {
     protected override void SetStartVelocity()
     {
         rigidbody.velocity = transform.InverseTransformDirection(new Vector3(10, 0, 0)); // set the velocity forward in our current facing
-        Debug.Log("projectile spawned");
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other);
         if (other.tag == Tags.Player)
         {
             PlayerController otherController = other.transform.GetComponent<PlayerController>();

@@ -413,6 +413,19 @@ public class PlayerController : MonoBehaviour
             SetVelocity(midairSpeed * sign, null, null);
             SetAccel(AccelType.MOVE, midairSpeed * sign, null, null, midairAcceleration);
         }
+
+        if (currVel.x < 0)
+        {
+            Vector3 rotationVector = transform.rotation.eulerAngles;
+            rotationVector.y = 180;
+            transform.rotation = Quaternion.Euler(rotationVector);
+        }
+        else if (currVel.x > 0)
+        {
+            Vector3 rotationVector = transform.rotation.eulerAngles;
+            rotationVector.y = 0;
+            transform.rotation = Quaternion.Euler(rotationVector);
+        }
 	}
 	void DoJump()
 	{
