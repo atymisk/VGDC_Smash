@@ -58,6 +58,10 @@
      <Compile Include="Assets\Scripts\PlayerTriggerColliderScript.cs" />
      <Compile Include="Assets\Scripts\Tags.cs" />
      <Compile Include="Assets\Scripts\UIController.cs" />
+     <None Include="Assets\UI\mainfile\font.txt" />
+     <None Include="Assets\UI\roboto-1.2\Roboto_v1.2\Roboto\LICENSE.txt" />
+     <None Include="Assets\UI\sf_distant_galaxy\Readme.txt" />
+     <None Include="Assets\UI\roboto-1.2\Roboto_v1.2\RobotoCondensed\LICENSE.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity4.6B20/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.2/UnityEngine.UI.dll</HintPath>
  </Reference>
