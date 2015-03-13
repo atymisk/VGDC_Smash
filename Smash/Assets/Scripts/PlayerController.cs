@@ -440,7 +440,7 @@ public class PlayerController : MonoBehaviour
 		}
 
 		// While jump timer is active ...
-		if (!TimerDone(TimerType.JUMP)) {
+		if (!TimerDone(TimerType.JUMP) && CanJump()) {
 
 			float scale = 1f - ((float) timers[TimerType.JUMP] / (float) MAX_JUMP_FRAMES);
 			float powerScale = Mathf.Pow(scale, jumpDegradeFactor);
@@ -514,8 +514,11 @@ public class PlayerController : MonoBehaviour
             deadPhysics = false;
         }
 
-        if(!deadPhysics && InState(AnimatorManager.State.DEAD))
+        if (!deadPhysics && InState(AnimatorManager.State.DEAD))
+        {
             deadPhysics = true;
+            SetVelocity(0f, 0f, 0f);                    // reset velocity and velocity tracker
+        }
     }
 
     void DoUIChecks()
@@ -540,7 +543,8 @@ public class PlayerController : MonoBehaviour
         transform.position = new Vector3(0, 10, 0);	// reset player position
         jumpCount = 0;								// reset jump count
         ResetAccel(AccelType.FALL);					// return fall acceleration to natural value
-        SetVelocity(0f, 0f, 0f);                    // reset velocity and velocity tracker
+        ResetAccel(AccelType.JUMP);                 // just in case they were jumping when they died
+        
         shieldHealth = maxShieldHealth;             // shields to full
 
         theStateMachine.SetBool(Triggers.StageGrounded, false);
