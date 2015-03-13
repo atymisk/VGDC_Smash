@@ -6,7 +6,7 @@ public abstract class Projectile : MonoBehaviour {
     //abstract class for all projectiles
     public int durationRemaining_frames; //how many frames will this projectile stay active
 	// Use this for initialization
-	void Start () {
+	void Awake () {
         SetStartVelocity();
 	}
     void FixedUpdate()

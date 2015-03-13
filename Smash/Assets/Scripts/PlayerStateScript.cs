@@ -15,6 +15,8 @@ public class PlayerStateScript : MonoBehaviour {
     private Animator theStateMachine;                       //reference to state machine
     private CameraController cam;                           //reference to camera controller for screen shake effect
     private UIController UI;                                   //reference to UI controller to update the UI readouts
+    private Collider thisCollider;                          //reference to this player's main physics collider
+    private Collider triggerCollider;                       //reference to our child collider for trigger stuff
 	// Use this for initialization
 	void Start () {
 	    currentDamage = 0;
@@ -23,7 +25,8 @@ public class PlayerStateScript : MonoBehaviour {
         UI = GameObject.FindWithTag(Tags.UI).transform.FindChild("Player" + Controls.ControllerToString(playerNumber)).GetComponent<UIController>();
         theStateMachine = GetComponent<Animator>();
         theStateMachine.SetInteger("numLives", numLives);
-
+        thisCollider = GetComponent<CapsuleCollider>();
+        triggerCollider = this.transform.FindChild("TriggerCollider").GetComponent<CapsuleCollider>();
         UI.UpdateUI(damage: currentDamage, lives: numLives);
 	}
 
@@ -61,8 +64,10 @@ public class PlayerStateScript : MonoBehaviour {
 
     public void SpawnProjectile(int index) // method for the animator to call when an attack spawns a projectile
     {
-        Instantiate(projectilePrefabs[index], this.transform.position, this.transform.rotation);
-        Debug.Log("projectile spawned");
+        Collider otherCollider = (Instantiate(projectilePrefabs[index], this.transform.position, this.transform.rotation) as GameObject).GetComponent<Collider>();
+        Debug.Log(otherCollider);
+        Physics.IgnoreCollision(thisCollider, otherCollider, true);
+        Physics.IgnoreCollision(triggerCollider, otherCollider, true);
     }
 
     //use these methods so we can add in UI linking

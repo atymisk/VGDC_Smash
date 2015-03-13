@@ -568,13 +568,13 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void SetAttackPriority(float attackPriority)
+    public void SetAttackPriority(float attackPriority) // to be called by the animations
     {
         didDamage = false;
         this.attackPriority = attackPriority;
     }
 
-    public void SetAttackDamage(float attackDamage)
+    public void SetAttackDamage(float attackDamage) // to be called by the animations
     {
         this.attackDamage = attackDamage;
     }
