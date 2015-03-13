@@ -3,11 +3,13 @@ using System.Collections;
 
 
 public class PlayerStateScript : MonoBehaviour {
+
     public float maxDamage = 500;
     public int numLives = 4;
     public float forceScalar = 10;
     public float verticalKnockback = 30;
     public Controls.Controller playerNumber;
+    public GameObject[] projectilePrefabs;                  //set in the inspector
     private float currentDamage;
     private PlayerController controller;                    //reference to playercontroller
     private Animator theStateMachine;                       //reference to state machine
@@ -57,6 +59,11 @@ public class PlayerStateScript : MonoBehaviour {
         UI.UpdateUI(lives: numLives);
     }
 
+    public void SpawnProjectile(int index) // method for the animator to call when an attack spawns a projectile
+    {
+        Instantiate(projectilePrefabs[index], this.transform.position, this.transform.rotation);
+        Debug.Log("projectile spawned");
+    }
 
     //use these methods so we can add in UI linking
     void AddDamage(float damage)
@@ -71,7 +78,7 @@ public class PlayerStateScript : MonoBehaviour {
         UI.UpdateUI(damage: currentDamage);
     }
 
-    float GetCurrentDamage()
+    public float GetCurrentDamage()
     {
         return currentDamage;
     }

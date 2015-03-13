@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour
     public float shieldRegen = 1.0f;
     public float shieldDegen = 3.0f;
 
-	public Text HUDText;
+	private Text HUDText;
 
     private Animator theStateMachine;
 	private Dictionary<AccelType, Acceleration> accelerations;	// collection of accelerations ocurring on this player
