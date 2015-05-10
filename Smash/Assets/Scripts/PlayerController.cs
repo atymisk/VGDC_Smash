@@ -160,8 +160,12 @@ public class PlayerController : MonoBehaviour
         DoUIChecks();
 
 		// apply accelerations
-		foreach (AccelType accelType in accelerations.Keys)
-			rigidbody.velocity = accelerations[accelType].ApplyToVector(rigidbody.velocity);
+        foreach (AccelType accelType in accelerations.Keys)
+        {
+            Debug.Log(GetComponent<Rigidbody>().velocity);
+            GetComponent<Rigidbody>().velocity = accelerations[accelType].ApplyToVector(GetComponent<Rigidbody>().velocity);
+            Debug.Log(GetComponent<Rigidbody>().velocity);
+        }
 	}
 
 	// COLLISIONS
@@ -369,7 +373,8 @@ public class PlayerController : MonoBehaviour
 	}
 	void SetVelocity(float? x, float? y, float? z)
 	{
-		rigidbody.velocity = new Vector3((x.HasValue)? x.Value : rigidbody.velocity.x, (y.HasValue)? y.Value : rigidbody.velocity.y, (z.HasValue)? z.Value : rigidbody.velocity.z);
+        Debug.Log("Ping!");
+		GetComponent<Rigidbody>().velocity = new Vector3((x.HasValue)? x.Value : GetComponent<Rigidbody>().velocity.x, (y.HasValue)? y.Value : GetComponent<Rigidbody>().velocity.y, (z.HasValue)? z.Value : GetComponent<Rigidbody>().velocity.z);
 	}
 	
 	// COMMAND HANDLERS
@@ -437,8 +442,8 @@ public class PlayerController : MonoBehaviour
             if (InState(AnimatorManager.State.MIDAIR))
             {				// give maneuverability burst while starting a jump in midair
                 float horizSign = Mathf.Sign(controls.GetCommandMagnitude(Controls.Command.MOVE));
-                horizSign = horizSign * Mathf.Sign(rigidbody.velocity.x);
-                SetAccel(AccelType.MOVE, rigidbody.velocity.x * horizSign, null, null, maneuverability);
+                horizSign = horizSign * Mathf.Sign(GetComponent<Rigidbody>().velocity.x);
+                SetAccel(AccelType.MOVE, GetComponent<Rigidbody>().velocity.x * horizSign, null, null, maneuverability);
             }
             SetTimer(TimerType.JUMP, 0);					// start jump timer
             SetTimerMax(TimerType.JUMP, MIN_JUMP_FRAMES);	// set jump to short hop duration

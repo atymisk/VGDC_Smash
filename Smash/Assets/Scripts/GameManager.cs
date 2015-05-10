@@ -30,13 +30,13 @@ public class GameManager : MonoBehaviour {
 
     void FixedUpdate()
     {
-        if (!audio.isPlaying)
+        if (!GetComponent<AudioSource>().isPlaying)
         {
             currentBGM += 1;
             if(currentBGM >= BGMPlaylist.Length) //we've reached the end of the array and need to return to the beginning
                 currentBGM = 0;
-            audio.clip = BGMPlaylist[currentBGM];
-            audio.Play();
+            GetComponent<AudioSource>().clip = BGMPlaylist[currentBGM];
+            GetComponent<AudioSource>().Play();
         }
     }
 }

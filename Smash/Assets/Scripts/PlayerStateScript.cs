@@ -41,7 +41,7 @@ public class PlayerStateScript : MonoBehaviour {
         //reset velocity to zero before forces?
         Vector2 forceDirection = transform.position - (hitOrigin); // the new vector is to make sure they are bumped upward
         forceDirection = forceDirection / forceDirection.magnitude; //make unit vector
-        rigidbody.velocity = (forceDirection * currentDamage * forceScalar / 100) + new Vector2(0,verticalKnockback); //the 100 is to cancel out the effects of writing percents as 100, 200, etc.
+        GetComponent<Rigidbody>().velocity = (forceDirection * currentDamage * forceScalar / 100) + new Vector2(0,verticalKnockback); //the 100 is to cancel out the effects of writing percents as 100, 200, etc.
         // second vector is to bump them up
     }
     private void CheckDeath()
