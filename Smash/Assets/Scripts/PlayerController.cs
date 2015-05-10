@@ -162,9 +162,7 @@ public class PlayerController : MonoBehaviour
 		// apply accelerations
         foreach (AccelType accelType in accelerations.Keys)
         {
-            Debug.Log(GetComponent<Rigidbody>().velocity);
             GetComponent<Rigidbody>().velocity = accelerations[accelType].ApplyToVector(GetComponent<Rigidbody>().velocity);
-            Debug.Log(GetComponent<Rigidbody>().velocity);
         }
 	}
 
@@ -373,7 +371,6 @@ public class PlayerController : MonoBehaviour
 	}
 	void SetVelocity(float? x, float? y, float? z)
 	{
-        Debug.Log("Ping!");
 		GetComponent<Rigidbody>().velocity = new Vector3((x.HasValue)? x.Value : GetComponent<Rigidbody>().velocity.x, (y.HasValue)? y.Value : GetComponent<Rigidbody>().velocity.y, (z.HasValue)? z.Value : GetComponent<Rigidbody>().velocity.z);
 	}
 	
